@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cyue6h4282fu4"]
 
 [ext_resource type="Script" uid="uid://bqk3p28bk5bhw" path="res://main.gd" id="1_ig7tw"]
+[ext_resource type="Script" uid="uid://b0ifbw5vukibm" path="res://AchievementManager.gd" id="2_0xm2m"]
 
 [node name="Main" type="Node2D" unique_id=49327064]
 script = ExtResource("1_ig7tw")
@@ -166,6 +167,9 @@ size_flags_horizontal = 3
 [node name="BotaoFecharConquistas" type="Button" parent="PainelConquistas/VBoxContainer" unique_id=366642620]
 layout_mode = 2
 text = "❌ Fechar"
+
+[node name="AchievementManager" type="Node" parent="." unique_id=1841464132]
+script = ExtResource("2_0xm2m")
 
 [connection signal="pressed" from="BotaoManivela" to="." method="_on_button_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
