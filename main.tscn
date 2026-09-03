@@ -46,18 +46,26 @@ theme_override_font_sizes/font_size = 24
 text = "⚡ BLACKOUT! CIDADE SEM ENERGIA ⚡"
 
 [node name="BotaoAbrirLoja" type="Button" parent="." unique_id=872938369]
-offset_left = 356.0
-offset_top = 424.0
-offset_right = 574.0
-offset_bottom = 455.0
-text = "🛒 Abrir Loja de Geradores"
+offset_left = 420.0
+offset_top = 426.0
+offset_right = 508.0
+offset_bottom = 457.0
+text = "🛒 Loja"
 
 [node name="BotaoAbrirUpgrades" type="Button" parent="." unique_id=1376902261]
-offset_left = 595.0
-offset_top = 421.0
-offset_right = 810.0
-offset_bottom = 452.0
-text = "🏆 Melhorias
+offset_left = 514.0
+offset_top = 426.0
+offset_right = 634.0
+offset_bottom = 457.0
+text = "🚀 Melhorias
+"
+
+[node name="BotaoAbrirConquistas" type="Button" parent="." unique_id=200330073]
+offset_left = 642.0
+offset_top = 428.0
+offset_right = 763.0
+offset_bottom = 459.0
+text = "🏆 Conquistas
 "
 
 [node name="PainelLoja" type="PanelContainer" parent="." unique_id=1241028789]
@@ -96,7 +104,7 @@ text = "Comprar Bateria
 
 [node name="BotaoFecharLoja" type="Button" parent="PainelLoja/VBoxContainer" unique_id=873757408]
 layout_mode = 2
-text = "X Fechar"
+text = "❌ Fechar"
 
 [node name="PainelUpgrades" type="PanelContainer" parent="." unique_id=822017108]
 visible = false
@@ -132,10 +140,38 @@ layout_mode = 2
 layout_mode = 2
 text = "❌ Fechar"
 
+[node name="PainelConquistas" type="PanelContainer" parent="." unique_id=975139815]
+visible = false
+offset_left = 374.0
+offset_top = 113.0
+offset_right = 784.0
+offset_bottom = 466.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PainelConquistas" unique_id=588383910]
+layout_mode = 2
+
+[node name="LabelTituloConquistas" type="Label" parent="PainelConquistas/VBoxContainer" unique_id=916414528]
+layout_mode = 2
+text = "--- Conquistas ---"
+horizontal_alignment = 1
+
+[node name="ScrollConquistas" type="ScrollContainer" parent="PainelConquistas/VBoxContainer" unique_id=1327947965]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+
+[node name="ListaConquistas" type="VBoxContainer" parent="PainelConquistas/VBoxContainer/ScrollConquistas" unique_id=883297737]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BotaoFecharConquistas" type="Button" parent="PainelConquistas/VBoxContainer" unique_id=366642620]
+layout_mode = 2
+text = "❌ Fechar"
+
 [connection signal="pressed" from="BotaoManivela" to="." method="_on_button_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
 [connection signal="pressed" from="BotaoAbrirLoja" to="." method="_on_botao_abrir_loja_pressed"]
 [connection signal="pressed" from="BotaoAbrirUpgrades" to="." method="_on_botao_abrir_upgrades_pressed"]
+[connection signal="pressed" from="BotaoAbrirConquistas" to="." method="_on_botao_abrir_conquistas_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarSolar" to="." method="_on_botao_comprar_solar_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarEolica" to="." method="_on_botao_comprar_eolica_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarGeotermica" to="." method="_on_botao_comprar_geotermica_pressed"]
@@ -148,3 +184,4 @@ text = "❌ Fechar"
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoUpgradeGeotermica" to="." method="_on_botao_upgrade_geotermica_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoUpgradeNuclear" to="." method="_on_botao_upgrade_nuclear_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoFecharUpgrades" to="." method="_on_botao_fechar_upgrades_pressed"]
+[connection signal="pressed" from="PainelConquistas/VBoxContainer/BotaoFecharConquistas" to="." method="_on_botao_fechar_conquistas_pressed"]
