@@ -6,17 +6,23 @@
 script = ExtResource("1_ig7tw")
 
 [node name="LabelOuro" type="Label" parent="." unique_id=531082720]
-offset_left = 416.0
-offset_top = 93.0
-offset_right = 483.0
-offset_bottom = 116.0
+offset_left = 484.0
+offset_top = 92.0
+offset_right = 551.0
+offset_bottom = 115.0
 text = "Ouro: $0"
 
+[node name="LabelClima" type="Label" parent="." unique_id=1815841161]
+offset_left = 488.0
+offset_top = 165.0
+offset_right = 528.0
+offset_bottom = 188.0
+
 [node name="LabelEnergia" type="Label" parent="." unique_id=541106065]
-offset_left = 644.0
-offset_top = 88.0
-offset_right = 754.0
-offset_bottom = 111.0
+offset_left = 484.0
+offset_top = 115.0
+offset_right = 594.0
+offset_bottom = 138.0
 text = "Energia: 0 MW"
 
 [node name="BotaoManivela" type="Button" parent="." unique_id=945216222]
@@ -32,9 +38,9 @@ autostart = true
 [node name="LabelBlackout" type="Label" parent="." unique_id=1924555642]
 visible = false
 offset_left = 360.0
-offset_top = 223.0
+offset_top = 248.0
 offset_right = 826.0
-offset_bottom = 257.0
+offset_bottom = 282.0
 theme_override_colors/font_color = Color(1, 0, 0.050980393, 1)
 theme_override_font_sizes/font_size = 24
 text = "⚡ BLACKOUT! CIDADE SEM ENERGIA ⚡"
