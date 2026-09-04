@@ -29,11 +29,13 @@ const DEMANDA_INICIAL: float = 5.0
 const PRODUCAO_BASE = {
 	"manivela": 2.0, "solar": 1.0, "eolica": 2.0, "geotermica": 6.0,
 	"nuclear": 25.0, "hidreletrica": 15.0, "carvao": 12.0, "biomassa": 4.0,
+	"fusao": 100.0 
 }
 
 const INCREMENTO_UPGRADE = {
 	"manivela": 1.5, "solar": 1.0, "eolica": 1.5, "geotermica": 3.0,
 	"nuclear": 10.0, "hidreletrica": 5.0, "carvao": 3.0, "biomassa": 1.5,
+	"fusao": 35.0
 }
 
 # ORDEM POR VALOR/MW - mais barato primeiro
@@ -46,6 +48,7 @@ const PRECO_BASE = {
 	"biomassa": 150.0,      # 4 MW limpa
 	"hidreletrica": 300.0,  # 15 MW
 	"nuclear": 450.0,       # 25 MW
+	"fusao": 1500.0,		# 100 MW
 	"up_manivela": 30.0,
 	"up_solar": 60.0,
 	"up_eolica": 100.0,
@@ -54,15 +57,16 @@ const PRECO_BASE = {
 	"up_geotermica": 250.0,
 	"up_hidreletrica": 400.0,
 	"up_nuclear": 800.0,
+	"up_fusao": 3000.0,
 	"filtro_carvao": 500.0,
 	"captura_carbono": 2000.0,
-	"tecnico_manutencao": 1000.0,
-	"tecnico_ambiental": 1200.0,
+	"tecnico_manutencao": 100.0,
+	"tecnico_ambiental": 120.0,
 }
 
 const POLUICAO_POR_GERADOR = {
 	"solar": 0.0, "eolica": 0.0, "geotermica": 0.05, "nuclear": 0.1,
-	"hidreletrica": 0.0, "carvao": 0.5, "biomassa": -0.1,
+	"hidreletrica": 0.0, "carvao": 0.5, "biomassa": -0.1, "fusao": -0.3
 }
 
 var ouro: float = 0.0:
@@ -90,6 +94,7 @@ var paineis_solares: int = 0
 var turbinas_eolicas: int = 0
 var usinas_geotermicas: int = 0
 var reatores_nucleares: int = 0
+var reatores_fusao: int = 0
 var hidreletricas: int = 0
 var usinas_carvao: int = 0
 var usinas_biomassa: int = 0
@@ -100,6 +105,7 @@ var nivel_solar_upgrade: int = 1
 var nivel_eolica_upgrade: int = 1
 var nivel_geotermica_upgrade: int = 1
 var nivel_nuclear_upgrade: int = 1
+var nivel_fusao_upgrade: int = 1
 var nivel_hidreletrica_upgrade: int = 1
 var nivel_carvao_upgrade: int = 1
 var nivel_biomassa_upgrade: int = 1
@@ -109,6 +115,7 @@ var producao_solar: float = PRODUCAO_BASE.solar
 var producao_eolica: float = PRODUCAO_BASE.eolica
 var producao_geotermica: float = PRODUCAO_BASE.geotermica
 var producao_nuclear: float = PRODUCAO_BASE.nuclear
+var producao_fusao: float = PRODUCAO_BASE.fusao
 var producao_hidreletrica: float = PRODUCAO_BASE.hidreletrica
 var producao_carvao: float = PRODUCAO_BASE.carvao
 var producao_biomassa: float = PRODUCAO_BASE.biomassa
@@ -132,6 +139,7 @@ func resetar_jogo_completo():
 	turbinas_eolicas = 0
 	usinas_geotermicas = 0
 	reatores_nucleares = 0
+	reatores_fusao = 0
 	hidreletricas = 0
 	usinas_carvao = 0
 	usinas_biomassa = 0
@@ -141,6 +149,7 @@ func resetar_jogo_completo():
 	nivel_eolica_upgrade = 1
 	nivel_geotermica_upgrade = 1
 	nivel_nuclear_upgrade = 1
+	nivel_fusao_upgrade = 1
 	nivel_hidreletrica_upgrade = 1
 	nivel_carvao_upgrade = 1
 	nivel_biomassa_upgrade = 1
@@ -148,7 +157,7 @@ func resetar_jogo_completo():
 	bonus_conquistas.clear()
 	saude = {
 		"solar": 100.0, "eolica": 100.0, "geotermica": 100.0,
-		"nuclear": 100.0, "hidreletrica": 100.0, "carvao": 100.0, "biomassa": 100.0
+		"nuclear": 100.0, "fusao": 100.0, "hidreletrica": 100.0, "carvao": 100.0, "biomassa": 100.0, 
 	}
 	tecnicos_manutencao = 0
 	tecnicos_ambientais = 0
@@ -194,6 +203,7 @@ func recalcular_tudo():
 	var mult_eolica = get_multiplicador("producao_eolica")
 	var mult_geo = get_multiplicador("producao_geotermica")
 	var mult_nuc = get_multiplicador("producao_nuclear")
+	var mult_fusao = get_multiplicador("producao_fusao")
 	var mult_hidro = get_multiplicador("producao_hidreletrica")
 	var mult_carvao = get_multiplicador("producao_carvao")
 	var mult_bio = get_multiplicador("producao_biomassa")
@@ -204,6 +214,7 @@ func recalcular_tudo():
 	producao_eolica = (PRODUCAO_BASE.eolica + (nivel_eolica_upgrade - 1) * INCREMENTO_UPGRADE.eolica) * mult_eolica * eficiencia_global
 	producao_geotermica = (PRODUCAO_BASE.geotermica + (nivel_geotermica_upgrade - 1) * INCREMENTO_UPGRADE.geotermica) * mult_geo * eficiencia_global
 	producao_nuclear = (PRODUCAO_BASE.nuclear + (nivel_nuclear_upgrade - 1) * INCREMENTO_UPGRADE.nuclear) * mult_nuc * eficiencia_global
+	producao_fusao = (PRODUCAO_BASE.fusao + (nivel_fusao_upgrade - 1) * INCREMENTO_UPGRADE.fusao) * mult_fusao * eficiencia_global
 	producao_hidreletrica = (PRODUCAO_BASE.hidreletrica + (nivel_hidreletrica_upgrade - 1) * INCREMENTO_UPGRADE.hidreletrica) * mult_hidro * eficiencia_global
 	producao_carvao = (PRODUCAO_BASE.carvao + (nivel_carvao_upgrade - 1) * INCREMENTO_UPGRADE.carvao) * mult_carvao * eficiencia_global
 	producao_biomassa = (PRODUCAO_BASE.biomassa + (nivel_biomassa_upgrade - 1) * INCREMENTO_UPGRADE.biomassa) * mult_bio * eficiencia_global
@@ -224,6 +235,7 @@ func pode_comprar(chave: String) -> bool:
 		"biomassa": return usinas_carvao >= 2 or paineis_solares >= 15
 		"hidreletrica": return usinas_geotermicas >= 2 or cidade_atual >= 1
 		"nuclear": return usinas_geotermicas >= 3 or hidreletricas >= 3
+		"fusao": return reatores_nucleares >= 3 
 		"filtro_carvao": return usinas_carvao > 0 and not filtro_carvao_ativo
 		"captura_carbono": return not captura_carbono_ativa and poluicao > 10
 		"tecnico_manutencao": return get_total_geradores() >= 5
@@ -264,6 +276,9 @@ func comprar(chave: String) -> bool:
 		"nuclear":
 			reatores_nucleares += 1
 			precos[chave] *= 1.15
+		"fusao":
+			reatores_fusao += 1
+			precos[chave] *= 1.2
 		"up_manivela":
 			nivel_manivela += 1
 			precos[chave] *= 1.8
@@ -287,6 +302,10 @@ func comprar(chave: String) -> bool:
 			precos[chave] *= 2.5
 		"up_nuclear":
 			nivel_nuclear_upgrade += 1
+			precos[chave] *= 2.5
+			
+		"up_fusao":
+			nivel_fusao_upgrade += 1
 			precos[chave] *= 2.5
 		"filtro_carvao":
 			filtro_carvao_ativo = true
@@ -346,6 +365,7 @@ func calcular_oferta_bruta(eh_dia: bool, mult_eolica: float, mult_solar: float, 
 	var h_eolica = saude.get("eolica", 100.0) / 100.0
 	var h_geo = saude.get("geotermica", 100.0) / 100.0
 	var h_nuc = saude.get("nuclear", 100.0) / 100.0
+	var h_fusao = saude.get("fusao", 100.0) / 100.0
 	var h_hidro = saude.get("hidreletrica", 100.0) / 100.0
 	var h_carvao = saude.get("carvao", 100.0) / 100.0
 	var h_bio = saude.get("biomassa", 100.0) / 100.0
@@ -356,15 +376,16 @@ func calcular_oferta_bruta(eh_dia: bool, mult_eolica: float, mult_solar: float, 
 	var prod_eolica = turbinas_eolicas * producao_eolica * mult_eolica * h_eolica
 	var prod_geo = usinas_geotermicas * producao_geotermica * h_geo
 	var prod_nuc = reatores_nucleares * producao_nuclear * h_nuc
+	var prod_fusao = reatores_fusao * producao_fusao * h_fusao
 	var prod_hidro = hidreletricas * producao_hidreletrica * mult_hidro * h_hidro
 	var prod_carvao = usinas_carvao * producao_carvao * h_carvao
 	var prod_bio = usinas_biomassa * producao_biomassa * h_bio
 	
-	return prod_solar + prod_eolica + prod_geo + prod_nuc + prod_hidro + prod_carvao + prod_bio
+	return prod_solar + prod_eolica + prod_geo + prod_nuc + prod_fusao + prod_hidro + prod_carvao + prod_bio
 
 func atualizar_poluicao(delta: float):
 	var prod_poluicao = 0.0
-	prod_poluicao += usinas_carvao * POLUICAO_POR_GERADOR.carvao
+	prod_poluicao += reatores_fusao + usinas_carvao * POLUICAO_POR_GERADOR.carvao
 	if filtro_carvao_ativo:
 		prod_poluicao *= 0.5
 	prod_poluicao += reatores_nucleares * POLUICAO_POR_GERADOR.nuclear
@@ -394,3 +415,31 @@ func desgastar(delta: float, clima_atual: int):
 		for tipo in saude.keys():
 			if get_quantidade(tipo) > 0:
 				saude[tipo] = min(100.0, saude[tipo] + 0.3 * tecnicos_manutencao * delta)
+
+# Dicionários de Descrições para UI Mobile
+const DESCRICOES_GERADORES = {
+	"solar": "Painel fotovoltaico. Para de gerar à noite.",
+	"eolica": "Turbina de vento. Gera mais durante tempestades.",
+	"biomassa": "Queima resíduos orgânicos. Limpa a poluição.",
+	"carvao": "Geração barata e rápida. Polui bastante.",
+	"geotermica": "Calor do solo. Produção contínua e estável.",
+	"hidreletrica": "Energia limpa em massa. Alto custo inicial.",
+	"nuclear": "Produção extrema para grandes metrópoles.",
+	"fusao": "Tecnologia de ponta. Gera energia massiva e limpa o ar."
+}
+
+const DESCRICOES_UPGRADES = {
+	"up_manivela": "+100% de energia por clique manual.",
+	"up_solar": "Painéis avançados: +50% de produção solar.",
+	"up_eolica": "Pás leves: +50% de produção eólica.",
+	"up_biomassa": "Compostagem rápida: +50% de eficiência.",
+	"up_carvao": "Caldeira pressurizada: +50% de geração.",
+	"up_geotermica": "Brocas profundas: +50% de eficiência.",
+	"up_hidreletrica": "Turbinas magnéticas: +50% de geração.",
+	"up_nuclear": "Urânio enriquecido: +50% de eficiência.",
+	"up_fusao": "Confinamento Magnético: +50% na eficiência de fusão.",
+	"filtro_carvao": "Reduz 50% da poluição das usinas de carvão.",
+	"captura_carbono": "Suga parte da poluição do ar ativamente.",
+	"tecnico_manutencao": "Repara a saúde das usinas automaticamente.",
+	"tecnico_ambiental": "Aumenta a limpeza diária do planeta."
+}

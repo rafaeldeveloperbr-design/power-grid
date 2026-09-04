@@ -6,13 +6,13 @@
 [node name="Main" type="Node2D" unique_id=49327064]
 script = ExtResource("1_ig7tw")
 
-[node name="TopHUD" type="PanelContainer" parent="." unique_id=5000000001]
+[node name="TopHUD" type="PanelContainer" parent="." unique_id=705032705]
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 780.0
 offset_bottom = 165.0
 
-[node name="VBoxTop" type="VBoxContainer" parent="TopHUD" unique_id=5000000002]
+[node name="VBoxTop" type="VBoxContainer" parent="TopHUD" unique_id=705032706]
 layout_mode = 2
 
 [node name="LabelCidade" type="Label" parent="TopHUD/VBoxTop" unique_id=310885591]
@@ -37,8 +37,8 @@ theme_override_font_sizes/font_size = 13
 
 [node name="LabelConquista" type="Label" parent="TopHUD/VBoxTop" unique_id=1762358522]
 visible = false
-layout_mode = 2
 modulate = Color(1, 1, 0.53333336, 1)
+layout_mode = 2
 theme_override_font_sizes/font_size = 13
 
 [node name="BotaoManivela" type="Button" parent="." unique_id=945216222]
@@ -70,7 +70,7 @@ theme_override_colors/font_color = Color(1, 0, 0.050980393, 1)
 theme_override_font_sizes/font_size = 16
 horizontal_alignment = 1
 
-[node name="BotoesPrincipais" type="HBoxContainer" parent="." unique_id=5000000003]
+[node name="BotoesPrincipais" type="HBoxContainer" parent="." unique_id=705032707]
 offset_left = 10.0
 offset_top = 240.0
 offset_right = 780.0
@@ -116,9 +116,9 @@ layout_mode = 2
 
 [node name="TituloLoja" type="Label" parent="PainelLoja/VBoxContainer" unique_id=1259132120]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "--- LOJA - ORDEM POR VALOR/MW ---"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
 
 [node name="ScrollLoja" type="ScrollContainer" parent="PainelLoja/VBoxContainer" unique_id=1000000001]
 custom_minimum_size = Vector2(0, 220)
@@ -186,11 +186,18 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 13
 
+[node name="BotaoComprarFusao" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=583300275]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
 [node name="BotaoFecharLoja" type="Button" parent="PainelLoja/VBoxContainer" unique_id=873757408]
 unique_name_in_owner = true
 layout_mode = 2
-text = "FECHAR LOJA"
 theme_override_font_sizes/font_size = 14
+text = "FECHAR LOJA"
 
 [node name="PainelUpgrades" type="PanelContainer" parent="." unique_id=822017108]
 visible = false
@@ -204,9 +211,9 @@ layout_mode = 2
 
 [node name="TituloUpgrade" type="Label" parent="PainelUpgrades/VBoxContainer" unique_id=2026177966]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "--- UPGRADES COM DESCRICAO ---"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
 
 [node name="ScrollUpgrades" type="ScrollContainer" parent="PainelUpgrades/VBoxContainer" unique_id=1000000003]
 custom_minimum_size = Vector2(0, 220)
@@ -274,11 +281,18 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 12
 
+[node name="BotaoUpgradeFusao" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=993476063]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+
 [node name="BotaoFecharUpgrades" type="Button" parent="PainelUpgrades/VBoxContainer" unique_id=1377917118]
 unique_name_in_owner = true
 layout_mode = 2
-text = "FECHAR UPGRADES"
 theme_override_font_sizes/font_size = 14
+text = "FECHAR UPGRADES"
 
 [node name="PainelConquistas" type="PanelContainer" parent="." unique_id=975139815]
 visible = false
@@ -292,9 +306,9 @@ layout_mode = 2
 
 [node name="LabelTituloConquistas" type="Label" parent="PainelConquistas/VBoxContainer" unique_id=916414528]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "--- Conquistas 10/25/50 Todos ---"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
 
 [node name="ScrollConquistas" type="ScrollContainer" parent="PainelConquistas/VBoxContainer" unique_id=1327947965]
 custom_minimum_size = Vector2(0, 220)
@@ -310,8 +324,8 @@ size_flags_horizontal = 3
 [node name="BotaoFecharConquistas" type="Button" parent="PainelConquistas/VBoxContainer" unique_id=366642620]
 unique_name_in_owner = true
 layout_mode = 2
-text = "FECHAR CONQUISTAS"
 theme_override_font_sizes/font_size = 14
+text = "FECHAR CONQUISTAS"
 
 [node name="PainelManutencao" type="PanelContainer" parent="." unique_id=1602470599]
 visible = false
@@ -325,9 +339,9 @@ layout_mode = 2
 
 [node name="LabelTituloManutencao" type="Label" parent="PainelManutencao/VBoxContainer" unique_id=190281305]
 layout_mode = 2
+theme_override_font_sizes/font_size = 14
 text = "--- Operacoes - Tecnicos ---"
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
 
 [node name="ScrollManutencao" type="ScrollContainer" parent="PainelManutencao/VBoxContainer" unique_id=1490838966]
 custom_minimum_size = Vector2(0, 220)
@@ -343,8 +357,8 @@ size_flags_horizontal = 3
 [node name="BotaoFecharManutencao" type="Button" parent="PainelManutencao/VBoxContainer" unique_id=924508180]
 unique_name_in_owner = true
 layout_mode = 2
-text = "FECHAR OPERACOES"
 theme_override_font_sizes/font_size = 14
+text = "FECHAR OPERACOES"
 
 [node name="AchievementManager" type="Node" parent="." unique_id=1841464132]
 script = ExtResource("2_0xm2m")
@@ -364,6 +378,7 @@ script = ExtResource("2_0xm2m")
 [connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarBiomassa" to="." method="_on_botao_comprar_biomassa_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarHidreletrica" to="." method="_on_botao_comprar_hidreletrica_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarNuclear" to="." method="_on_botao_comprar_nuclear_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarFusao" to="." method="_on_botao_comprar_fusao_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoFecharLoja" to="." method="_on_botao_fechar_loja_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeManivela" to="." method="_on_botao_upgrade_manivela_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeSolar" to="." method="_on_botao_upgrade_solar_pressed"]
@@ -373,6 +388,7 @@ script = ExtResource("2_0xm2m")
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeGeotermica" to="." method="_on_botao_upgrade_geotermica_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeHidreletrica" to="." method="_on_botao_upgrade_hidreletrica_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeNuclear" to="." method="_on_botao_upgrade_nuclear_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeFusao" to="." method="_on_botao_upgrade_fusao_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoFecharUpgrades" to="." method="_on_botao_fechar_upgrades_pressed"]
 [connection signal="pressed" from="PainelConquistas/VBoxContainer/BotaoFecharConquistas" to="." method="_on_botao_fechar_conquistas_pressed"]
 [connection signal="pressed" from="PainelManutencao/VBoxContainer/BotaoFecharManutencao" to="." method="_on_botao_fechar_manutencao_pressed"]
