@@ -6,17 +6,17 @@ signal producao_mudou()
 signal cidade_mudou()
 signal poluicao_mudou()
 
-# --- 9 CIDADES - Nome que você pediu ---
+# --- 9 CIDADES (Meta dobrando a cada nível) ---
 const CIDADES = [
-	{"nome": "Vilarejo", "cap": 20000.0, "desc": "Começo humilde", "desbloqueia": "hidreletrica"},
-	{"nome": "Povoado", "cap": 50000.0, "desc": "Crescendo", "desbloqueia": "carvao"},
-	{"nome": "Vila Rural", "cap": 100000.0, "desc": "Zona agrícola", "desbloqueia": "biomassa"},
-	{"nome": "Cidade Pequena", "cap": 200000.0, "desc": "Primeiros prédios", "desbloqueia": "geotermica"},
-	{"nome": "Cidade Média", "cap": 400000.0, "desc": "Centro regional", "desbloqueia": "nuclear"},
-	{"nome": "Metrópole", "cap": 800000.0, "desc": "Milhões de habitantes", "desbloqueia": "extra"},
-	{"nome": "Megalópole", "cap": 1500000.0, "desc": "Gigante urbana", "desbloqueia": "extra"},
-	{"nome": "Nação Industrial", "cap": 3000000.0, "desc": "País inteiro", "desbloqueia": "extra"},
-	{"nome": "Império Tecnológico", "cap": 6000000.0, "desc": "Fim do jogo", "desbloqueia": "fim"},
+	{"nome": "Vilarejo", "cap": 40000.0, "desc": "Começo humilde", "desbloqueia": "hidreletrica"},
+	{"nome": "Povoado", "cap": 80000.0, "desc": "Crescendo", "desbloqueia": "carvao"},
+	{"nome": "Vila Rural", "cap": 160000.0, "desc": "Zona agrícola", "desbloqueia": "biomassa"},
+	{"nome": "Cidade Pequena", "cap": 320000.0, "desc": "Primeiros prédios", "desbloqueia": "geotermica"},
+	{"nome": "Cidade Média", "cap": 640000.0, "desc": "Centro regional", "desbloqueia": "nuclear"},
+	{"nome": "Metrópole", "cap": 1280000.0, "desc": "Milhões de habitantes", "desbloqueia": "fusao"},
+	{"nome": "Megalópole", "cap": 2560000.0, "desc": "Gigante urbana", "desbloqueia": "extra"},
+	{"nome": "Nação Industrial", "cap": 5120000.0, "desc": "País inteiro", "desbloqueia": "extra"},
+	{"nome": "Império Tecnológico", "cap": 10240000.0, "desc": "Fim do jogo", "desbloqueia": "fim"},
 ]
 
 var cidade_atual: int = 0
@@ -385,12 +385,13 @@ func calcular_oferta_bruta(eh_dia: bool, mult_eolica: float, mult_solar: float, 
 
 func atualizar_poluicao(delta: float):
 	var prod_poluicao = 0.0
-	prod_poluicao += reatores_fusao + usinas_carvao * POLUICAO_POR_GERADOR.carvao
+	prod_poluicao += usinas_carvao * POLUICAO_POR_GERADOR.carvao
 	if filtro_carvao_ativo:
 		prod_poluicao *= 0.5
 	prod_poluicao += reatores_nucleares * POLUICAO_POR_GERADOR.nuclear
 	prod_poluicao += usinas_geotermicas * POLUICAO_POR_GERADOR.geotermica
 	prod_poluicao += usinas_biomassa * POLUICAO_POR_GERADOR.biomassa
+	prod_poluicao += reatores_fusao * POLUICAO_POR_GERADOR.fusao 
 	if captura_carbono_ativa:
 		prod_poluicao -= 1.0
 	prod_poluicao -= tecnicos_ambientais * 0.6
