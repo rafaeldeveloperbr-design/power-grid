@@ -6,211 +6,373 @@
 [node name="Main" type="Node2D" unique_id=49327064]
 script = ExtResource("1_ig7tw")
 
-[node name="LabelOuro" type="Label" parent="." unique_id=531082720]
-offset_left = 484.0
-offset_top = 92.0
-offset_right = 551.0
-offset_bottom = 115.0
-text = "Ouro: $0"
+[node name="TopHUD" type="PanelContainer" parent="." unique_id=5000000001]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 780.0
+offset_bottom = 165.0
 
-[node name="LabelClima" type="Label" parent="." unique_id=1815841161]
-offset_left = 488.0
-offset_top = 165.0
-offset_right = 528.0
-offset_bottom = 188.0
+[node name="VBoxTop" type="VBoxContainer" parent="TopHUD" unique_id=5000000002]
+layout_mode = 2
 
-[node name="LabelConquista" type="Label" parent="." unique_id=1762358522]
+[node name="LabelCidade" type="Label" parent="TopHUD/VBoxTop" unique_id=310885591]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="LabelOuro" type="Label" parent="TopHUD/VBoxTop" unique_id=531082720]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+
+[node name="LabelEnergia" type="Label" parent="TopHUD/VBoxTop" unique_id=541106065]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="LabelClima" type="Label" parent="TopHUD/VBoxTop" unique_id=1815841161]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="LabelPoluicao" type="Label" parent="TopHUD/VBoxTop" unique_id=2145197363]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+
+[node name="LabelConquista" type="Label" parent="TopHUD/VBoxTop" unique_id=1762358522]
 visible = false
+layout_mode = 2
 modulate = Color(1, 1, 0.53333336, 1)
-offset_left = 492.0
-offset_top = 207.0
-offset_right = 532.0
-offset_bottom = 230.0
-
-[node name="LabelEnergia" type="Label" parent="." unique_id=541106065]
-offset_left = 484.0
-offset_top = 115.0
-offset_right = 594.0
-offset_bottom = 138.0
-text = "Energia: 0 MW"
+theme_override_font_sizes/font_size = 13
 
 [node name="BotaoManivela" type="Button" parent="." unique_id=945216222]
 unique_name_in_owner = true
-offset_left = 496.0
-offset_top = 308.0
-offset_right = 666.0
-offset_bottom = 339.0
-text = "Girar Manivela (+1MW)"
+offset_left = 10.0
+offset_top = 175.0
+offset_right = 260.0
+offset_bottom = 210.0
+text = "Girar Manivela"
+
+[node name="BotaoMigrarCidade" type="Button" parent="." unique_id=1979185010]
+visible = false
+offset_left = 280.0
+offset_top = 175.0
+offset_right = 580.0
+offset_bottom = 210.0
+text = "Migrar Cidade"
 
 [node name="Timer" type="Timer" parent="." unique_id=1489963794]
 autostart = true
 
 [node name="LabelBlackout" type="Label" parent="." unique_id=1924555642]
 visible = false
-offset_left = 360.0
-offset_top = 248.0
-offset_right = 826.0
-offset_bottom = 282.0
+offset_left = 10.0
+offset_top = 215.0
+offset_right = 780.0
+offset_bottom = 235.0
 theme_override_colors/font_color = Color(1, 0, 0.050980393, 1)
-theme_override_font_sizes/font_size = 24
-text = "⚡ BLACKOUT! CIDADE SEM ENERGIA ⚡"
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
 
-[node name="BotaoAbrirLoja" type="Button" parent="." unique_id=872938369]
-unique_name_in_owner = true
-offset_left = 420.0
-offset_top = 426.0
-offset_right = 508.0
-offset_bottom = 457.0
-text = "🛒 Loja"
+[node name="BotoesPrincipais" type="HBoxContainer" parent="." unique_id=5000000003]
+offset_left = 10.0
+offset_top = 240.0
+offset_right = 780.0
+offset_bottom = 270.0
 
-[node name="BotaoAbrirUpgrades" type="Button" parent="." unique_id=1376902261]
+[node name="BotaoAbrirLoja" type="Button" parent="BotoesPrincipais" unique_id=872938369]
 unique_name_in_owner = true
-offset_left = 514.0
-offset_top = 426.0
-offset_right = 634.0
-offset_bottom = 457.0
-text = "🚀 Melhorias
-"
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Loja"
 
-[node name="BotaoAbrirConquistas" type="Button" parent="." unique_id=200330073]
+[node name="BotaoAbrirUpgrades" type="Button" parent="BotoesPrincipais" unique_id=1376902261]
 unique_name_in_owner = true
-offset_left = 642.0
-offset_top = 428.0
-offset_right = 763.0
-offset_bottom = 459.0
-text = "🏆 Conquistas
-"
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Upgrades"
+
+[node name="BotaoAbrirConquistas" type="Button" parent="BotoesPrincipais" unique_id=200330073]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Conquistas"
+
+[node name="BotaoAbrirManutencao" type="Button" parent="BotoesPrincipais" unique_id=1550834587]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Operacoes"
 
 [node name="PainelLoja" type="PanelContainer" parent="." unique_id=1241028789]
 visible = false
-offset_left = 451.0
-offset_top = 122.0
-offset_right = 735.0
-offset_bottom = 487.0
+offset_left = 10.0
+offset_top = 280.0
+offset_right = 780.0
+offset_bottom = 600.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PainelLoja" unique_id=829250236]
 layout_mode = 2
 
 [node name="TituloLoja" type="Label" parent="PainelLoja/VBoxContainer" unique_id=1259132120]
 layout_mode = 2
-text = "--- LOJA DE GERADORES ---"
+text = "--- LOJA - ORDEM POR VALOR/MW ---"
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
 
-[node name="BotaoComprarSolar" type="Button" parent="PainelLoja/VBoxContainer" unique_id=1525441994]
-unique_name_in_owner = true
+[node name="ScrollLoja" type="ScrollContainer" parent="PainelLoja/VBoxContainer" unique_id=1000000001]
+custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
-text = "Comprar Painel Solar($10)"
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="BotaoComprarEolica" type="Button" parent="PainelLoja/VBoxContainer" unique_id=922356318]
-unique_name_in_owner = true
+[node name="ListaLoja" type="VBoxContainer" parent="PainelLoja/VBoxContainer/ScrollLoja" unique_id=1000000002]
 layout_mode = 2
-text = "Comprar Turbina Eólica"
+size_flags_horizontal = 3
 
-[node name="BotaoComprarGeotermica" type="Button" parent="PainelLoja/VBoxContainer" unique_id=991439509]
+[node name="BotaoComprarSolar" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=1525441994]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
 
-[node name="BotaoComprarNuclear" type="Button" parent="PainelLoja/VBoxContainer" unique_id=1991096706]
+[node name="BotaoComprarEolica" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=922356318]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
 
-[node name="BotaoComprarBateria" type="Button" parent="PainelLoja/VBoxContainer" unique_id=1941490968]
+[node name="BotaoComprarBateria" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=1941490968]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
-text = "Comprar Bateria
-"
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="BotaoComprarCarvao" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=1436716173]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="BotaoComprarGeotermica" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=991439509]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="BotaoComprarBiomassa" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=902502615]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="BotaoComprarHidreletrica" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=365082498]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+
+[node name="BotaoComprarNuclear" type="Button" parent="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja" unique_id=1991096706]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
 
 [node name="BotaoFecharLoja" type="Button" parent="PainelLoja/VBoxContainer" unique_id=873757408]
 unique_name_in_owner = true
 layout_mode = 2
-text = "❌ Fechar"
+text = "FECHAR LOJA"
+theme_override_font_sizes/font_size = 14
 
 [node name="PainelUpgrades" type="PanelContainer" parent="." unique_id=822017108]
 visible = false
-offset_left = 453.0
-offset_top = 138.0
-offset_right = 747.0
-offset_bottom = 485.0
+offset_left = 10.0
+offset_top = 280.0
+offset_right = 780.0
+offset_bottom = 600.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PainelUpgrades" unique_id=1166757757]
 layout_mode = 2
 
 [node name="TituloUpgrade" type="Label" parent="PainelUpgrades/VBoxContainer" unique_id=2026177966]
 layout_mode = 2
-text = "--- UPGRADES ---"
+text = "--- UPGRADES COM DESCRICAO ---"
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
 
-[node name="BotaoUpgradeManivela" type="Button" parent="PainelUpgrades/VBoxContainer" unique_id=1668870629]
-unique_name_in_owner = true
+[node name="ScrollUpgrades" type="ScrollContainer" parent="PainelUpgrades/VBoxContainer" unique_id=1000000003]
+custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="BotaoUpgradeSolar" type="Button" parent="PainelUpgrades/VBoxContainer" unique_id=1425159277]
-unique_name_in_owner = true
+[node name="ListaUpgrades" type="VBoxContainer" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades" unique_id=1000000004]
 layout_mode = 2
+size_flags_horizontal = 3
 
-[node name="BotaoUpgradeEolica" type="Button" parent="PainelUpgrades/VBoxContainer" unique_id=1329859170]
+[node name="BotaoUpgradeManivela" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=1668870629]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
 
-[node name="BotaoUpgradeGeotermica" type="Button" parent="PainelUpgrades/VBoxContainer" unique_id=1892740099]
+[node name="BotaoUpgradeSolar" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=1425159277]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
 
-[node name="BotaoUpgradeNuclear" type="Button" parent="PainelUpgrades/VBoxContainer" unique_id=1515893375]
+[node name="BotaoUpgradeEolica" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=1329859170]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="BotaoUpgradeCarvao" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=526439945]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="BotaoUpgradeBiomassa" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=1696598729]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="BotaoUpgradeGeotermica" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=1892740099]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="BotaoUpgradeHidreletrica" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=1914260554]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+
+[node name="BotaoUpgradeNuclear" type="Button" parent="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades" unique_id=1515893375]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
 
 [node name="BotaoFecharUpgrades" type="Button" parent="PainelUpgrades/VBoxContainer" unique_id=1377917118]
 unique_name_in_owner = true
 layout_mode = 2
-text = "❌ Fechar"
+text = "FECHAR UPGRADES"
+theme_override_font_sizes/font_size = 14
 
 [node name="PainelConquistas" type="PanelContainer" parent="." unique_id=975139815]
 visible = false
-offset_left = 374.0
-offset_top = 113.0
-offset_right = 784.0
-offset_bottom = 466.0
+offset_left = 10.0
+offset_top = 280.0
+offset_right = 780.0
+offset_bottom = 600.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PainelConquistas" unique_id=588383910]
 layout_mode = 2
 
 [node name="LabelTituloConquistas" type="Label" parent="PainelConquistas/VBoxContainer" unique_id=916414528]
 layout_mode = 2
-text = "--- Conquistas ---"
+text = "--- Conquistas 10/25/50 Todos ---"
 horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
 
 [node name="ScrollConquistas" type="ScrollContainer" parent="PainelConquistas/VBoxContainer" unique_id=1327947965]
-custom_minimum_size = Vector2(300, 300)
+custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
 [node name="ListaConquistas" type="VBoxContainer" parent="PainelConquistas/VBoxContainer/ScrollConquistas" unique_id=883297737]
+custom_minimum_size = Vector2(740, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="BotaoFecharConquistas" type="Button" parent="PainelConquistas/VBoxContainer" unique_id=366642620]
 unique_name_in_owner = true
 layout_mode = 2
-text = "❌ Fechar"
+text = "FECHAR CONQUISTAS"
+theme_override_font_sizes/font_size = 14
+
+[node name="PainelManutencao" type="PanelContainer" parent="." unique_id=1602470599]
+visible = false
+offset_left = 10.0
+offset_top = 280.0
+offset_right = 780.0
+offset_bottom = 600.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PainelManutencao" unique_id=1446792929]
+layout_mode = 2
+
+[node name="LabelTituloManutencao" type="Label" parent="PainelManutencao/VBoxContainer" unique_id=190281305]
+layout_mode = 2
+text = "--- Operacoes - Tecnicos ---"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+
+[node name="ScrollManutencao" type="ScrollContainer" parent="PainelManutencao/VBoxContainer" unique_id=1490838966]
+custom_minimum_size = Vector2(0, 220)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ListaManutencao" type="VBoxContainer" parent="PainelManutencao/VBoxContainer/ScrollManutencao" unique_id=898104307]
+custom_minimum_size = Vector2(740, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BotaoFecharManutencao" type="Button" parent="PainelManutencao/VBoxContainer" unique_id=924508180]
+unique_name_in_owner = true
+layout_mode = 2
+text = "FECHAR OPERACOES"
+theme_override_font_sizes/font_size = 14
 
 [node name="AchievementManager" type="Node" parent="." unique_id=1841464132]
 script = ExtResource("2_0xm2m")
 
 [connection signal="pressed" from="BotaoManivela" to="." method="_on_botao_manivela_pressed"]
+[connection signal="pressed" from="BotaoMigrarCidade" to="." method="_on_botao_migrar_cidade_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
-[connection signal="pressed" from="BotaoAbrirLoja" to="." method="_on_botao_abrir_loja_pressed"]
-[connection signal="pressed" from="BotaoAbrirUpgrades" to="." method="_on_botao_abrir_upgrades_pressed"]
-[connection signal="pressed" from="BotaoAbrirConquistas" to="." method="_on_botao_abrir_conquistas_pressed"]
-[connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarSolar" to="." method="_on_botao_comprar_solar_pressed"]
-[connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarEolica" to="." method="_on_botao_comprar_eolica_pressed"]
-[connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarGeotermica" to="." method="_on_botao_comprar_geotermica_pressed"]
-[connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarNuclear" to="." method="_on_botao_comprar_nuclear_pressed"]
-[connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoComprarBateria" to="." method="_on_botao_comprar_bateria_pressed"]
+[connection signal="pressed" from="BotoesPrincipais/BotaoAbrirLoja" to="." method="_on_botao_abrir_loja_pressed"]
+[connection signal="pressed" from="BotoesPrincipais/BotaoAbrirUpgrades" to="." method="_on_botao_abrir_upgrades_pressed"]
+[connection signal="pressed" from="BotoesPrincipais/BotaoAbrirConquistas" to="." method="_on_botao_abrir_conquistas_pressed"]
+[connection signal="pressed" from="BotoesPrincipais/BotaoAbrirManutencao" to="." method="_on_botao_abrir_manutencao_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarSolar" to="." method="_on_botao_comprar_solar_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarEolica" to="." method="_on_botao_comprar_eolica_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarBateria" to="." method="_on_botao_comprar_bateria_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarCarvao" to="." method="_on_botao_comprar_carvao_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarGeotermica" to="." method="_on_botao_comprar_geotermica_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarBiomassa" to="." method="_on_botao_comprar_biomassa_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarHidreletrica" to="." method="_on_botao_comprar_hidreletrica_pressed"]
+[connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarNuclear" to="." method="_on_botao_comprar_nuclear_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/BotaoFecharLoja" to="." method="_on_botao_fechar_loja_pressed"]
-[connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoUpgradeManivela" to="." method="_on_botao_upgrade_manivela_pressed"]
-[connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoUpgradeSolar" to="." method="_on_botao_upgrade_solar_pressed"]
-[connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoUpgradeEolica" to="." method="_on_botao_upgrade_eolica_pressed"]
-[connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoUpgradeGeotermica" to="." method="_on_botao_upgrade_geotermica_pressed"]
-[connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoUpgradeNuclear" to="." method="_on_botao_upgrade_nuclear_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeManivela" to="." method="_on_botao_upgrade_manivela_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeSolar" to="." method="_on_botao_upgrade_solar_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeEolica" to="." method="_on_botao_upgrade_eolica_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeCarvao" to="." method="_on_botao_upgrade_carvao_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeBiomassa" to="." method="_on_botao_upgrade_biomassa_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeGeotermica" to="." method="_on_botao_upgrade_geotermica_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeHidreletrica" to="." method="_on_botao_upgrade_hidreletrica_pressed"]
+[connection signal="pressed" from="PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeNuclear" to="." method="_on_botao_upgrade_nuclear_pressed"]
 [connection signal="pressed" from="PainelUpgrades/VBoxContainer/BotaoFecharUpgrades" to="." method="_on_botao_fechar_upgrades_pressed"]
 [connection signal="pressed" from="PainelConquistas/VBoxContainer/BotaoFecharConquistas" to="." method="_on_botao_fechar_conquistas_pressed"]
+[connection signal="pressed" from="PainelManutencao/VBoxContainer/BotaoFecharManutencao" to="." method="_on_botao_fechar_manutencao_pressed"]
