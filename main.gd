@@ -161,7 +161,7 @@ func atualizar_cidade():
 func atualizar_loja() -> void:
 	if botao_comprar_solar:
 		var desc = GameState.DESCRICOES_GERADORES.get("solar", "")
-		botao_comprar_solar.text = "1. Solar ($%d) +%.1f MW | Qtd: %d\n%s" % [
+		botao_comprar_solar.text = "Solar ($%d) +%.1f MW | Qtd: %d\n%s" % [
 			int(GameState.get_preco("solar")), 
 			GameState.producao_solar, 
 			GameState.paineis_solares,
@@ -170,18 +170,20 @@ func atualizar_loja() -> void:
 		botao_comprar_solar.disabled = not GameState.pode_comprar("solar")
 
 	if botao_comprar_eolica:
-		var desc = GameState.DESCRICOES_GERADORES.get("eolica", "")
-		botao_comprar_eolica.text = "2. Eólica ($%d) +%.1f MW | Qtd: %d\n%s" % [
-			int(GameState.get_preco("eolica")), 
-			GameState.producao_eolica, 
-			GameState.turbinas_eolicas,
-			desc
-		]
-		botao_comprar_eolica.disabled = not GameState.pode_comprar("eolica")
+		botao_comprar_eolica.visible = GameState.paineis_solares >= 5
+		if botao_comprar_eolica.visible:
+			var desc = GameState.DESCRICOES_GERADORES.get("eolica", "")
+			botao_comprar_eolica.text = "Eólica ($%d) +%.1f MW | Qtd: %d\n%s" % [
+				int(GameState.get_preco("eolica")), 
+				GameState.producao_eolica, 
+				GameState.turbinas_eolicas,
+				desc
+			]
+			botao_comprar_eolica.disabled = not GameState.pode_comprar("eolica")
 
 	if botao_comprar_bateria:
 		var desc = GameState.DESCRICOES_GERADORES.get("bateria", "Aumenta a capacidade de armazenamento.")
-		botao_comprar_bateria.text = "3. Bateria ($%d) +%.1f MW | Qtd: %d\n%s" % [
+		botao_comprar_bateria.text = "Bateria ($%d) +%.1f MW | Qtd: %d\n%s" % [
 			int(GameState.get_preco("bateria")), 
 			GameState.capacidade_por_bateria, 
 			GameState.baterias,
@@ -190,69 +192,81 @@ func atualizar_loja() -> void:
 		botao_comprar_bateria.disabled = not GameState.pode_comprar("bateria")
 
 	if botao_comprar_carvao:
-		var desc = GameState.DESCRICOES_GERADORES.get("carvao", "")
-		botao_comprar_carvao.text = "4. Carvão ($%d) +%.1f MW | Qtd: %d 🔴\n%s" % [
-			int(GameState.get_preco("carvao")), 
-			GameState.producao_carvao, 
-			GameState.usinas_carvao,
-			desc
-		]
-		botao_comprar_carvao.disabled = not GameState.pode_comprar("carvao")
+		botao_comprar_carvao.visible = GameState.turbinas_eolicas >= 5
+		if botao_comprar_carvao.visible:
+			var desc = GameState.DESCRICOES_GERADORES.get("carvao", "")
+			botao_comprar_carvao.text = "Carvão ($%d) +%.1f MW | Qtd: %d 🔴\n%s" % [
+				int(GameState.get_preco("carvao")), 
+				GameState.producao_carvao, 
+				GameState.usinas_carvao,
+				desc
+			]
+			botao_comprar_carvao.disabled = not GameState.pode_comprar("carvao")
 
 	if botao_comprar_geotermica:
-		var desc = GameState.DESCRICOES_GERADORES.get("geotermica", "")
-		botao_comprar_geotermica.text = "5. Geotérmica ($%d) +%.1f MW | Qtd: %d\n%s" % [
-			int(GameState.get_preco("geotermica")), 
-			GameState.producao_geotermica, 
-			GameState.usinas_geotermicas,
-			desc
-		]
-		botao_comprar_geotermica.disabled = not GameState.pode_comprar("geotermica")
+		botao_comprar_geotermica.visible = GameState.usinas_carvao >= 2
+		if botao_comprar_geotermica.visible:
+			var desc = GameState.DESCRICOES_GERADORES.get("geotermica", "")
+			botao_comprar_geotermica.text = "Geotérmica ($%d) +%.1f MW | Qtd: %d\n%s" % [
+				int(GameState.get_preco("geotermica")), 
+				GameState.producao_geotermica, 
+				GameState.usinas_geotermicas,
+				desc
+			]
+			botao_comprar_geotermica.disabled = not GameState.pode_comprar("geotermica")
 
 	if botao_comprar_biomassa:
-		var desc = GameState.DESCRICOES_GERADORES.get("biomassa", "")
-		botao_comprar_biomassa.text = "6. Biomassa ($%d) +%.1f MW | Qtd: %d 🟢\n%s" % [
-			int(GameState.get_preco("biomassa")), 
-			GameState.producao_biomassa, 
-			GameState.usinas_biomassa,
-			desc
-		]
-		botao_comprar_biomassa.disabled = not GameState.pode_comprar("biomassa")
+		botao_comprar_biomassa.visible = GameState.usinas_geotermicas >= 5
+		if botao_comprar_biomassa.visible:
+			var desc = GameState.DESCRICOES_GERADORES.get("biomassa", "")
+			botao_comprar_biomassa.text = "Biomassa ($%d) +%.1f MW | Qtd: %d 🟢\n%s" % [
+				int(GameState.get_preco("biomassa")), 
+				GameState.producao_biomassa, 
+				GameState.usinas_biomassa,
+				desc
+			]
+			botao_comprar_biomassa.disabled = not GameState.pode_comprar("biomassa")
 
 	if botao_comprar_hidreletrica:
-		var desc = GameState.DESCRICOES_GERADORES.get("hidreletrica", "")
-		botao_comprar_hidreletrica.text = "7. Hidro ($%d) +%.1f MW | Qtd: %d\n%s" % [
-			int(GameState.get_preco("hidreletrica")), 
-			GameState.producao_hidreletrica, 
-			GameState.hidreletricas,
-			desc
-		]
-		botao_comprar_hidreletrica.disabled = not GameState.pode_comprar("hidreletrica")
+		botao_comprar_hidreletrica.visible = GameState.usinas_biomassa >= 5
+		if botao_comprar_hidreletrica.visible:
+			var desc = GameState.DESCRICOES_GERADORES.get("hidreletrica", "")
+			botao_comprar_hidreletrica.text = "Hidro ($%d) +%.1f MW | Qtd: %d\n%s" % [
+				int(GameState.get_preco("hidreletrica")), 
+				GameState.producao_hidreletrica, 
+				GameState.hidreletricas,
+				desc
+			]
+			botao_comprar_hidreletrica.disabled = not GameState.pode_comprar("hidreletrica")
 
 	if botao_comprar_nuclear:
-		var desc = GameState.DESCRICOES_GERADORES.get("nuclear", "")
-		botao_comprar_nuclear.text = "8. Nuclear ($%d) +%.1f MW | Qtd: %d\n%s" % [
-			int(GameState.get_preco("nuclear")), 
-			GameState.producao_nuclear, 
-			GameState.reatores_nucleares,
-			desc
-		]
-		botao_comprar_nuclear.disabled = not GameState.pode_comprar("nuclear")
+		botao_comprar_nuclear.visible = GameState.hidreletricas >= 5
+		if botao_comprar_nuclear.visible:
+			var desc = GameState.DESCRICOES_GERADORES.get("nuclear", "")
+			botao_comprar_nuclear.text = "Nuclear ($%d) +%.1f MW | Qtd: %d\n%s" % [
+				int(GameState.get_preco("nuclear")), 
+				GameState.producao_nuclear, 
+				GameState.reatores_nucleares,
+				desc
+			]
+			botao_comprar_nuclear.disabled = not GameState.pode_comprar("nuclear")
 
 	if botao_comprar_fusao:
-		var desc = GameState.DESCRICOES_GERADORES.get("fusao", "")
-		botao_comprar_fusao.text = "9. Fusão ($%d) +%.1f MW | Qtd: %d 🟢\n%s" % [
-			int(GameState.get_preco("fusao")), 
-			GameState.producao_fusao, 
-			GameState.reatores_fusao,
-			desc
-	]
-		botao_comprar_fusao.disabled = not GameState.pode_comprar("fusao")
-	
+		botao_comprar_fusao.visible = GameState.reatores_nucleares >= 5
+		if botao_comprar_fusao.visible:
+			var desc = GameState.DESCRICOES_GERADORES.get("fusao", "")
+			botao_comprar_fusao.text = "Fusão ($%d) +%.1f MW | Qtd: %d 🟢\n%s" % [
+				int(GameState.get_preco("fusao")), 
+				GameState.producao_fusao, 
+				GameState.reatores_fusao,
+				desc
+			]
+			botao_comprar_fusao.disabled = not GameState.pode_comprar("fusao")
+			
 func atualizar_upgrades() -> void:
 	if botao_upgrade_manivela:
 		var desc = GameState.DESCRICOES_UPGRADES["up_manivela"]
-		botao_upgrade_manivela.text = "1. Manivela Lvl %d ($%d) -> +%.1f MW\n%s" % [
+		botao_upgrade_manivela.text = "Manivela Lvl %d ($%d) -> +%.1f MW\n%s" % [
 			GameState.nivel_manivela, 
 			int(GameState.get_preco("up_manivela")), 
 			GameState.poder_manivela + 1.5,
@@ -264,7 +278,7 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_solar.visible = GameState.paineis_solares > 0
 		if botao_upgrade_solar.visible:
 			var desc = GameState.DESCRICOES_UPGRADES["up_solar"]
-			botao_upgrade_solar.text = "2. Células Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_solar.text = "Células Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_solar_upgrade, 
 				int(GameState.get_preco("up_solar")), 
 				GameState.producao_solar + 1.0,
@@ -276,7 +290,7 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_eolica.visible = GameState.turbinas_eolicas > 0
 		if botao_upgrade_eolica.visible:
 			var desc = GameState.DESCRICOES_UPGRADES["up_eolica"]
-			botao_upgrade_eolica.text = "3. Pás Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_eolica.text = "Pás Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_eolica_upgrade, 
 				int(GameState.get_preco("up_eolica")), 
 				GameState.producao_eolica + 1.5,
@@ -288,7 +302,7 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_carvao.visible = GameState.usinas_carvao > 0
 		if botao_upgrade_carvao.visible:
 			var desc = GameState.DESCRICOES_UPGRADES["up_carvao"]
-			botao_upgrade_carvao.text = "4. Caldeira Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_carvao.text = "Caldeira Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_carvao_upgrade, 
 				int(GameState.get_preco("up_carvao")), 
 				GameState.producao_carvao + 3.0,
@@ -300,7 +314,7 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_biomassa.visible = GameState.usinas_biomassa > 0
 		if botao_upgrade_biomassa.visible:
 			var desc = GameState.DESCRICOES_UPGRADES["up_biomassa"]
-			botao_upgrade_biomassa.text = "5. Compostagem Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_biomassa.text = "Compostagem Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_biomassa_upgrade, 
 				int(GameState.get_preco("up_biomassa")), 
 				GameState.producao_biomassa + 1.5,
@@ -312,7 +326,7 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_geotermica.visible = GameState.usinas_geotermicas > 0
 		if botao_upgrade_geotermica.visible:
 			var desc = GameState.DESCRICOES_UPGRADES["up_geotermica"]
-			botao_upgrade_geotermica.text = "6. Perfuração Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_geotermica.text = "Perfuração Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_geotermica_upgrade, 
 				int(GameState.get_preco("up_geotermica")), 
 				GameState.producao_geotermica + 3.0,
@@ -324,7 +338,7 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_hidreletrica.visible = GameState.hidreletricas > 0
 		if botao_upgrade_hidreletrica.visible:
 			var desc = GameState.DESCRICOES_UPGRADES["up_hidreletrica"]
-			botao_upgrade_hidreletrica.text = "7. Turbinas Hidro Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_hidreletrica.text = "Turbinas Hidro Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_hidreletrica_upgrade, 
 				int(GameState.get_preco("up_hidreletrica")), 
 				GameState.producao_hidreletrica + 5.0,
@@ -336,7 +350,7 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_nuclear.visible = GameState.reatores_nucleares > 0
 		if botao_upgrade_nuclear.visible:
 			var desc = GameState.DESCRICOES_UPGRADES["up_nuclear"]
-			botao_upgrade_nuclear.text = "8. Fissão Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_nuclear.text = "Fissão Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_nuclear_upgrade, 
 				int(GameState.get_preco("up_nuclear")), 
 				GameState.producao_nuclear + 10.0,
@@ -348,13 +362,13 @@ func atualizar_upgrades() -> void:
 		botao_upgrade_fusao.visible = GameState.reatores_fusao > 0
 		if botao_upgrade_fusao.visible:
 			var desc = GameState.DESCRICOES_UPGRADES.get("up_fusao", "")
-			botao_upgrade_fusao.text = "9. Reator Lvl %d ($%d) -> %.1f MW/s\n%s" % [
+			botao_upgrade_fusao.text = "Reator Lvl %d ($%d) -> %.1f MW/s\n%s" % [
 				GameState.nivel_fusao_upgrade, 
 				int(GameState.get_preco("up_fusao")), 
 				GameState.producao_fusao + 35.0,
 				desc
-		]
-		botao_upgrade_fusao.disabled = not GameState.pode_comprar("up_fusao")
+			]
+			botao_upgrade_fusao.disabled = not GameState.pode_comprar("up_fusao")
 
 func atualizar_manutencao():
 	if not lista_manutencao: return

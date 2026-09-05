@@ -229,13 +229,13 @@ func pode_comprar(chave: String) -> bool:
 	if ouro < get_preco(chave):
 		return false
 	match chave:
-		"eolica": return paineis_solares >= 3
-		"carvao": return paineis_solares >= 5
-		"geotermica": return turbinas_eolicas >= 3 or usinas_carvao >= 2
-		"biomassa": return usinas_carvao >= 2 or paineis_solares >= 15
-		"hidreletrica": return usinas_geotermicas >= 2 or cidade_atual >= 1
-		"nuclear": return usinas_geotermicas >= 3 or hidreletricas >= 3
-		"fusao": return reatores_nucleares >= 3 
+		"eolica": return paineis_solares >= 5
+		"carvao": return turbinas_eolicas >= 5
+		"geotermica": return usinas_carvao >= 2
+		"biomassa": return usinas_geotermicas >= 5
+		"hidreletrica": return usinas_biomassa >= 5
+		"nuclear": return hidreletricas >= 5
+		"fusao": return reatores_nucleares >= 5
 		"filtro_carvao": return usinas_carvao > 0 and not filtro_carvao_ativo
 		"captura_carbono": return not captura_carbono_ativa and poluicao > 10
 		"tecnico_manutencao": return get_total_geradores() >= 5
