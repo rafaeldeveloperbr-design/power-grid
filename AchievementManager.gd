@@ -32,6 +32,12 @@ const CONQUISTAS: Array[Dictionary] = [
 	{"chave": "nuclear_10", "nome": "Átomo I", "desc": "10 Reatores", "tipo": "nuclear", "meta": 10, "bonus": "producao_nuclear"},
 	{"chave": "nuclear_25", "nome": "Átomo II", "desc": "25 Reatores", "tipo": "nuclear", "meta": 25, "bonus": "producao_nuclear"},
 	{"chave": "nuclear_50", "nome": "Átomo III", "desc": "50 Reatores", "tipo": "nuclear", "meta": 50, "bonus": "producao_nuclear"},
+	
+	# Fusao
+	{"chave": "fusao_10", "nome": "Poder das Estrelas I", "desc": "10 Reatores de Fusão", "tipo": "fusao", "meta": 10, "bonus": "producao_fusao"},
+	{"chave": "fusao_25", "nome": "Poder das Estrelas II", "desc": "25 Reatores de Fusão", "tipo": "fusao", "meta": 25, "bonus": "producao_fusao"},
+	{"chave": "fusao_50", "nome": "Poder das Estrelas III", "desc": "50 Reatores de Fusão", "tipo": "fusao", "meta": 50, "bonus": "producao_fusao"},
+	
 	# Bateria
 	{"chave": "bateria_10", "nome": "Reserva I", "desc": "10 Baterias", "tipo": "bateria", "meta": 10, "bonus": "capacidade_bateria"},
 	{"chave": "bateria_25", "nome": "Reserva II", "desc": "25 Baterias", "tipo": "bateria", "meta": 25, "bonus": "capacidade_bateria"},

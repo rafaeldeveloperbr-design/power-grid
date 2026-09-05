@@ -272,7 +272,7 @@ func comprar(chave: String) -> bool:
 			precos[chave] *= 1.15
 		"hidreletrica":
 			hidreletricas += 1
-			precos[chave] *= 1.18
+			precos[chave] *= 1.15
 		"nuclear":
 			reatores_nucleares += 1
 			precos[chave] *= 1.15
@@ -303,10 +303,9 @@ func comprar(chave: String) -> bool:
 		"up_nuclear":
 			nivel_nuclear_upgrade += 1
 			precos[chave] *= 2.5
-			
 		"up_fusao":
 			nivel_fusao_upgrade += 1
-			precos[chave] *= 2.5
+			precos[chave] *= 2.6
 		"filtro_carvao":
 			filtro_carvao_ativo = true
 		"captura_carbono":
@@ -329,6 +328,7 @@ func reparar(tipo: String) -> bool:
 		"eolica": custo = turbinas_eolicas * 8
 		"geotermica": custo = usinas_geotermicas * 20
 		"nuclear": custo = reatores_nucleares * 100
+		"fusao": custo = reatores_fusao * 200
 		"hidreletrica": custo = hidreletricas * 40
 		"carvao": custo = usinas_carvao * 15
 		"biomassa": custo = usinas_biomassa * 10
@@ -346,6 +346,7 @@ func get_quantidade(tipo: String) -> int:
 		"eolica": return turbinas_eolicas
 		"geotermica": return usinas_geotermicas
 		"nuclear": return reatores_nucleares
+		"fusao": return reatores_fusao
 		"hidreletrica": return hidreletricas
 		"carvao": return usinas_carvao
 		"biomassa": return usinas_biomassa

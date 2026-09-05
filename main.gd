@@ -398,7 +398,7 @@ func atualizar_manutencao():
 	btn_tecnico.pressed.connect(func(): _comprar("tecnico_manutencao"))
 	lista_manutencao.add_child(btn_tecnico)
 
-	for tipo in ["solar", "eolica", "carvao", "geotermica", "biomassa", "hidreletrica", "nuclear"]:
+	for tipo in ["solar", "eolica", "carvao", "geotermica", "biomassa", "hidreletrica", "nuclear", "fusao"]:
 		var qtd = GameState.get_quantidade(tipo)
 		if qtd <= 0: continue
 		var saude = GameState.saude.get(tipo, 100.0)
