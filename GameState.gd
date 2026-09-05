@@ -26,6 +26,12 @@ const CAPACIDADE_BASE: float = 200.0
 const CAPACIDADE_POR_BATERIA_BASE: float = 200.0
 const DEMANDA_INICIAL: float = 5.0
 
+# --- BALANCEAMENTO - mexe aqui pra testar ---
+const CAPACIDADE_POR_TECNICO = 12
+const REPARO_BASE_POR_TECNICO = 1.2 # % total por segundo
+const DESGASTE_BASE = 0.35 # antes era 0.08, por isso não caia nunca
+const LIMPEZA_BASE_AMBIENTAL = 0.45
+
 const PRODUCAO_BASE = {
 	"manivela": 2.0, "solar": 1.0, "eolica": 2.0, "geotermica": 6.0,
 	"nuclear": 25.0, "hidreletrica": 15.0, "carvao": 12.0, "biomassa": 4.0,
@@ -48,7 +54,7 @@ const PRECO_BASE = {
 	"biomassa": 150.0,      # 4 MW limpa
 	"hidreletrica": 300.0,  # 15 MW
 	"nuclear": 450.0,       # 25 MW
-	"fusao": 1500.0,		# 100 MW
+	"fusao": 1500.0,        # 100 MW
 	"up_manivela": 30.0,
 	"up_solar": 60.0,
 	"up_eolica": 100.0,
@@ -243,7 +249,7 @@ func pode_comprar(chave: String) -> bool:
 		_: return true
 
 func get_total_geradores() -> int:
-	return paineis_solares + turbinas_eolicas + usinas_geotermicas + reatores_nucleares + hidreletricas + usinas_carvao + usinas_biomassa
+	return paineis_solares + turbinas_eolicas + usinas_geotermicas + reatores_nucleares + reatores_fusao + hidreletricas + usinas_carvao + usinas_biomassa
 
 func comprar(chave: String) -> bool:
 	if not pode_comprar(chave):
@@ -312,33 +318,15 @@ func comprar(chave: String) -> bool:
 			captura_carbono_ativa = true
 		"tecnico_manutencao":
 			tecnicos_manutencao += 1
-			precos[chave] *= 1.6
+			precos[chave] *= 1.20
 		"tecnico_ambiental":
 			tecnicos_ambientais += 1
-			precos[chave] *= 1.7
+			precos[chave] *= 1.20
 	
 	recalcular_tudo()
 	recurso_mudou.emit()
 	return true
 
-func reparar(tipo: String) -> bool:
-	var custo = 0.0
-	match tipo:
-		"solar": custo = paineis_solares * 5
-		"eolica": custo = turbinas_eolicas * 8
-		"geotermica": custo = usinas_geotermicas * 20
-		"nuclear": custo = reatores_nucleares * 100
-		"fusao": custo = reatores_fusao * 200
-		"hidreletrica": custo = hidreletricas * 40
-		"carvao": custo = usinas_carvao * 15
-		"biomassa": custo = usinas_biomassa * 10
-		_: return false
-	
-	if ouro < custo: return false
-	ouro -= custo
-	saude[tipo] = 100.0
-	recurso_mudou.emit()
-	return true
 
 func get_quantidade(tipo: String) -> int:
 	match tipo:
@@ -384,39 +372,116 @@ func calcular_oferta_bruta(eh_dia: bool, mult_eolica: float, mult_solar: float, 
 	
 	return prod_solar + prod_eolica + prod_geo + prod_nuc + prod_fusao + prod_hidro + prod_carvao + prod_bio
 
+
 func atualizar_poluicao(delta: float):
-	var prod_poluicao = 0.0
-	prod_poluicao += usinas_carvao * POLUICAO_POR_GERADOR.carvao
-	if filtro_carvao_ativo:
-		prod_poluicao *= 0.5
-	prod_poluicao += reatores_nucleares * POLUICAO_POR_GERADOR.nuclear
-	prod_poluicao += usinas_geotermicas * POLUICAO_POR_GERADOR.geotermica
-	prod_poluicao += usinas_biomassa * POLUICAO_POR_GERADOR.biomassa
-	prod_poluicao += reatores_fusao * POLUICAO_POR_GERADOR.fusao 
-	if captura_carbono_ativa:
-		prod_poluicao -= 1.0
-	prod_poluicao -= tecnicos_ambientais * 0.6
+	var producao = 0.0
+	for tipo in POLUICAO_POR_GERADOR.keys():
+		var qtd = get_quantidade(tipo)
+		if qtd <= 0: continue
+		var pol = POLUICAO_POR_GERADOR[tipo] * qtd
+		if tipo == "carvao" and filtro_carvao_ativo: pol *= 0.5
+		producao += pol
 	
-	poluicao = clamp(poluicao + prod_poluicao * delta, 0.0, 100.0)
+	if captura_carbono_ativa: producao -= 2.5
+	producao -= 0.08 # respiro natural
+	
+	# Ambientais também com capacidade
+	if tecnicos_ambientais > 0:
+		var cap_amb = tecnicos_ambientais * 15
+		var total_poluidores = usinas_carvao + reatores_nucleares + usinas_geotermicas
+		var efic_amb = 1.0
+		if total_poluidores > cap_amb:
+			efic_amb = float(cap_amb) / float(max(total_poluidores, 1))
+		var bonus = 1.0 + min((tecnicos_ambientais - 1) * 0.08, 0.4)
+		var limpeza = tecnicos_ambientais * LIMPEZA_BASE_AMBIENTAL * bonus * efic_amb
+		producao -= limpeza
+	
+	poluicao = clamp(poluicao + producao * delta, 0.0, 100.0)
 	poluicao_mudou.emit()
 
 func desgastar(delta: float, clima_atual: int):
 	var fator_clima = 1.0
-	if clima_atual == 1: fator_clima = 2.5
-	if clima_atual == 3: fator_clima = 1.5
-	
+	if clima_atual == 1: fator_clima = 2.2 # tempestade pesa mais agora
+	if clima_atual == 3: fator_clima = 1.6
+
+	var total_geradores = get_total_geradores()
+	var tipos_ativos = []
 	for tipo in saude.keys():
+		if get_quantidade(tipo) > 0:
+			tipos_ativos.append(tipo)
+
+	# Eficiência por sobrecarga
+	var capacidade_total = tecnicos_manutencao * CAPACIDADE_POR_TECNICO
+	var eficiencia_sobrecarga = 1.0
+	if total_geradores > 0 and capacidade_total > 0:
+		eficiencia_sobrecarga = min(1.0, float(capacidade_total) / float(total_geradores))
+		if total_geradores > capacidade_total * 2: # muito sobrecarregado = penalidade extra
+			eficiencia_sobrecarga *= 0.6
+
+	for tipo in tipos_ativos:
+		var fator_tipo = 1.0
+		match tipo:
+			"carvao": fator_tipo = 2.0
+			"eolica": fator_tipo = 1.5
+			"nuclear": fator_tipo = 1.6
+			"fusao": fator_tipo = 2.2
+		
 		var qtd = get_quantidade(tipo)
-		if qtd > 0:
-			var fator_tipo = 1.0
-			if tipo == "carvao": fator_tipo = 2.0
-			if tipo == "eolica": fator_tipo = 1.3
-			saude[tipo] = max(0.0, saude[tipo] - 0.05 * fator_clima * fator_tipo * delta)
+		var fator_qtd = 1.0 + (qtd / 15.0) * 0.25 # quanto mais usina daquele tipo, mais desgasta
+		
+		var taxa = DESGASTE_BASE * fator_clima * fator_tipo * fator_qtd * delta
+		saude[tipo] = max(0.0, saude[tipo] - taxa)
+
+	# REPARO - só funciona bem se não estiver sobrecarregado
+	if tecnicos_manutencao > 0 and tipos_ativos.size() > 0:
+		var bonus = 1.0 + min((tecnicos_manutencao - 1) * 0.08, 0.4) # cap 40%
+		var poder_total = tecnicos_manutencao * REPARO_BASE_POR_TECNICO * bonus * eficiencia_sobrecarga * delta
+		
+		var danificados = []
+		for t in tipos_ativos:
+			if saude[t] < 99.9:
+				danificados.append(t)
+		
+		if danificados.size() > 0:
+			var total_danificado_qtd = 0
+			for t in danificados:
+				total_danificado_qtd += get_quantidade(t)
+			
+			for t in danificados:
+				var peso = float(get_quantidade(t)) / float(total_danificado_qtd)
+				# reparo proporcional à quantidade daquele tipo
+				var reparo = poder_total * peso * 2.5
+				saude[t] = min(100.0, saude[t] + reparo)
+
+func reparar(tipo: String) -> bool:
+	var qtd = get_quantidade(tipo)
+	if qtd <= 0: return false
 	
-	if tecnicos_manutencao > 0:
-		for tipo in saude.keys():
-			if get_quantidade(tipo) > 0:
-				saude[tipo] = min(100.0, saude[tipo] + 0.3 * tecnicos_manutencao * delta)
+	var saude_atual = saude.get(tipo, 100.0)
+	if saude_atual >= 99.9: return false
+	
+	var dano = 100.0 - saude_atual
+	var custo_base_por_unidade = 5.0
+	match tipo:
+		"solar": custo_base_por_unidade = 5
+		"eolica": custo_base_por_unidade = 8
+		"biomassa": custo_base_por_unidade = 10
+		"carvao": custo_base_por_unidade = 15
+		"geotermica": custo_base_por_unidade = 20
+		"hidreletrica": custo_base_por_unidade = 40
+		"nuclear": custo_base_por_unidade = 100
+		"fusao": custo_base_por_unidade = 200
+	
+	# custo proporcional ao dano
+	var custo = qtd * custo_base_por_unidade * (dano / 100.0)
+	custo = max(custo, custo_base_por_unidade * 0.2) # mínimo 20% pra não ficar de graça
+	
+	if ouro < custo: return false
+	
+	ouro -= custo
+	saude[tipo] = 100.0
+	recurso_mudou.emit()
+	return true
 
 # Dicionários de Descrições para UI Mobile
 const DESCRICOES_GERADORES = {

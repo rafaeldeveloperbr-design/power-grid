@@ -1,5 +1,8 @@
 extends Node2D
-# main.gd - V3 com SCROLL em Loja e Upgrades
+
+#Aumentar velocidade para testar o game, remover na fase final
+const MODO_TESTE = true
+const VELOCIDADE_TESTE = 5.0 # 5x mais rápido
 
 enum Clima { NORMAL, TEMPESTADE, ECLIPSE, ONDA_DE_CALOR, SECA }
 
@@ -91,6 +94,17 @@ func _ready() -> void:
 			achievement_manager.conquista_desbloqueada.connect(_on_conquista_desbloqueada)
 		
 	atualizar_interface()
+	
+		# --- MODO TESTE ---
+	if MODO_TESTE:
+		print(">>> MODO TESTE ATIVO <<<")
+		if has_node("Timer"):
+			$Timer.wait_time = $Timer.wait_time / VELOCIDADE_TESTE
+		GameState.ouro = 50000
+		GameState.energia_armazenada = GameState.calcular_capacidade_maxima()
+		if label_blackout:
+			label_blackout.text = "[TESTE %dx] %s" % [VELOCIDADE_TESTE, label_blackout.text]
+			label_blackout.visible = true
 
 func _on_cidade_mudou():
 	mensagem_conquista = "🏙️ Bem-vindo a %s! Eficiência +15%%" % GameState.get_cidade_atual_info().nome
@@ -375,8 +389,23 @@ func atualizar_manutencao():
 	for child in lista_manutencao.get_children():
 		child.queue_free()
 
+	# --- POLUIÇÃO ---
 	var label_titulo_pol = Label.new()
-	label_titulo_pol.text = "--- POLUIÇÃO ---\nPoluição: %.0f%% | Ambientais: %d (-%.1f/s)" % [GameState.poluicao, GameState.tecnicos_ambientais, GameState.tecnicos_ambientais * 0.6]
+	var prod_atual = 0.0
+	for tipo in GameState.POLUICAO_POR_GERADOR.keys():
+		var qtd = GameState.get_quantidade(tipo)
+		prod_atual += qtd * GameState.POLUICAO_POR_GERADOR[tipo]
+	
+	var limpeza_amb = 0.0
+	if GameState.tecnicos_ambientais > 0:
+		var bonus_amb = 1.0 + min((GameState.tecnicos_ambientais - 1) * 0.08, 0.4)
+		# usa a constante nova se existir, se não usa 0.45
+		var base_amb = GameState.LIMPEZA_BASE_AMBIENTAL if "LIMPEZA_BASE_AMBIENTAL" in GameState else 0.45
+		limpeza_amb = GameState.tecnicos_ambientais * base_amb * bonus_amb
+	
+	label_titulo_pol.text = "--- POLUIÇÃO ---\nPoluição: %.0f%% (%.1f/s) | 🌿 %d limpam %.1f/s" % [
+		GameState.poluicao, prod_atual - limpeza_amb, GameState.tecnicos_ambientais, limpeza_amb
+	]
 	label_titulo_pol.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lista_manutencao.add_child(label_titulo_pol)
 
@@ -401,13 +430,35 @@ func atualizar_manutencao():
 	var separador = HSeparator.new()
 	lista_manutencao.add_child(separador)
 
-	var label_titulo_manut = Label.new()
+	# --- SAÚDE - UMA LABEL SÓ ---
 	var total_geradores = GameState.get_total_geradores()
-	label_titulo_manut.text = "--- SAÚDE (%d total) ---\nTécnicos Manutenção: %d (+%.1f%%/s)" % [total_geradores, GameState.tecnicos_manutencao, GameState.tecnicos_manutencao * 0.3]
+	
+	var cap_por_tec = GameState.CAPACIDADE_POR_TECNICO if "CAPACIDADE_POR_TECNICO" in GameState else 12
+	var base_reparo = GameState.REPARO_BASE_POR_TECNICO if "REPARO_BASE_POR_TECNICO" in GameState else 1.2
+	
+	var capacidade = GameState.tecnicos_manutencao * cap_por_tec
+	var eficiencia = 1.0
+	if total_geradores > 0 and capacidade > 0:
+		eficiencia = min(1.0, float(capacidade) / float(total_geradores))
+		if total_geradores > capacidade * 2:
+			eficiencia *= 0.6
+
+	var bonus_manut = 1.0
+	if GameState.tecnicos_manutencao > 0:
+		bonus_manut = 1.0 + min((GameState.tecnicos_manutencao - 1) * 0.08, 0.4)
+	
+	var poder_total = GameState.tecnicos_manutencao * base_reparo * bonus_manut * eficiencia
+	var status = "OK" if eficiencia >= 0.9 else "SOBRECARREGADO!" if eficiencia < 0.5 else "ATENÇÃO"
+
+	var label_titulo_manut = Label.new()
+	label_titulo_manut.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label_titulo_manut.text = "--- SAÚDE (%d Estruturas) ---\n🔧 %d técnicos (cap %d) | Eficiência: %.0f%% [%s]\nReparo total: %.2f%%/s" % [
+		total_geradores, GameState.tecnicos_manutencao, capacidade, eficiencia * 100.0, status, poder_total
+	]
 	lista_manutencao.add_child(label_titulo_manut)
 
 	var btn_tecnico = Button.new()
-	btn_tecnico.text = "🔧 Técnico Manutenção ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_manutencao")), GameState.tecnicos_manutencao]
+	btn_tecnico.text = "🔧 Contratar Técnico ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_manutencao")), GameState.tecnicos_manutencao]
 	btn_tecnico.disabled = not GameState.pode_comprar("tecnico_manutencao")
 	btn_tecnico.pressed.connect(func(): _comprar("tecnico_manutencao"))
 	lista_manutencao.add_child(btn_tecnico)
@@ -422,14 +473,10 @@ func atualizar_manutencao():
 		lista_manutencao.add_child(label)
 		if saude < 95:
 			var btn_rep = Button.new()
-			var custo = qtd * 5
-			match tipo:
-				"eolica": custo = qtd * 8
-				"geotermica": custo = qtd * 20
-				"nuclear": custo = qtd * 100
-				"hidreletrica": custo = qtd * 40
-				"carvao": custo = qtd * 15
-				"biomassa": custo = qtd * 10
+			var custo_base = {"solar":5, "eolica":8, "carvao":15, "geotermica":20, "biomassa":10, "hidreletrica":40, "nuclear":100, "fusao":200}.get(tipo, 5)
+			var dano = 100.0 - saude
+			var custo = int(qtd * custo_base * (dano / 100.0))
+			custo = max(custo, int(custo_base * 0.2))
 			btn_rep.text = "🔧 Consertar %s ($%d)" % [tipo.capitalize(), custo]
 			btn_rep.disabled = GameState.ouro < custo
 			btn_rep.pressed.connect(func(): reparar_tipo(tipo))
@@ -595,3 +642,49 @@ func _on_botao_upgrade_geotermica_pressed(): _comprar("up_geotermica")
 func _on_botao_upgrade_hidreletrica_pressed(): _comprar("up_hidreletrica")
 func _on_botao_upgrade_nuclear_pressed(): _comprar("up_nuclear")
 func _on_botao_upgrade_fusao_pressed(): _comprar("up_fusao")
+
+
+func _unhandled_input(event):
+	if not MODO_TESTE: return
+	if event is InputEventKey and event.pressed:
+		match event.keycode:
+			KEY_F1: # + ouro
+				GameState.ouro += 10000
+				print("Cheat: +10k ouro")
+			KEY_F2: # + bateria cheia
+				GameState.energia_armazenada = GameState.calcular_capacidade_maxima()
+			KEY_F3: # libera tudo
+				GameState.paineis_solares = 10
+				GameState.turbinas_eolicas = 10
+				GameState.usinas_carvao = 5
+				GameState.usinas_geotermicas = 5
+				GameState.usinas_biomassa = 5
+				GameState.hidreletricas = 5
+				GameState.reatores_nucleares = 5
+				GameState.reatores_fusao = 5
+				GameState.baterias = 20
+				GameState.recalcular_tudo()
+			KEY_F4: # repara tudo
+				for tipo in GameState.saude.keys():
+					GameState.saude[tipo] = 100.0
+			KEY_F5: # limpa poluição
+				GameState.poluicao = 0.0
+			KEY_F6: # avança cidade
+				GameState.demanda_cidade = GameState.get_cap_atual()
+				_on_botao_migrar_cidade_pressed()
+			KEY_F7: # alterna velocidade 1x / 5x / 20x
+				if has_node("Timer"):
+					if $Timer.wait_time > 0.3:
+						$Timer.wait_time = 0.05
+						print("Teste: 20x")
+					elif $Timer.wait_time > 0.1:
+						$Timer.wait_time = 1.0
+						print("Teste: 1x normal")
+					else:
+						$Timer.wait_time = 0.2
+						print("Teste: 5x")
+			KEY_F8: # zera preços
+				for k in GameState.precos.keys():
+					GameState.precos[k] = 1.0
+				print("Cheat: tudo por $1")
+		atualizar_interface()
