@@ -83,3 +83,7 @@ func renderizar_lista(container: VBoxContainer) -> void:
 			label_item.text = "🔒 %s (%d/%d)\n   %s\n " % [item.nome, mini(qtd_atual, item.meta), item.meta, item.desc]
 			label_item.modulate = Color(1, 1, 1, 0.7)
 		container.add_child(label_item)
+		
+func resetar_conquistas():
+	for c in CONQUISTAS:
+		desbloqueadas[c.chave] = false

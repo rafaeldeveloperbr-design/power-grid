@@ -615,6 +615,8 @@ func _on_botao_fechar_manutencao_pressed() -> void:
 	mudar_visibilidade_botoes(true)
 func _on_botao_migrar_cidade_pressed() -> void:
 	if GameState.migrar_cidade():
+		if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
+			achievement_manager.resetar_conquistas()
 		atualizar_interface()
 
 func _comprar(tipo: String):

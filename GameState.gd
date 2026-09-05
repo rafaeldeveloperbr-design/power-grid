@@ -185,13 +185,53 @@ func pode_migrar_cidade() -> bool:
 func migrar_cidade() -> bool:
 	if not pode_migrar_cidade():
 		return false
+	
 	cidade_atual += 1
-	eficiencia_global *= 1.15
-	demanda_cidade = DEMANDA_INICIAL
+	eficiencia_global *= 1.15 # só isso que fica
+	
+	# --- ZERA TUDO ---
+	ouro = 0.0
 	energia_armazenada = 0.0
-	poluicao *= 0.5
-	cidade_mudou.emit()
+	demanda_cidade = DEMANDA_INICIAL
+	oferta_atual = 0.0
+	poluicao = 0.0
+	em_blackout = false
+	
+	paineis_solares = 0
+	turbinas_eolicas = 0
+	usinas_geotermicas = 0
+	reatores_nucleares = 0
+	reatores_fusao = 0
+	hidreletricas = 0
+	usinas_carvao = 0
+	usinas_biomassa = 0
+	baterias = 0
+	
+	nivel_manivela = 1
+	nivel_solar_upgrade = 1
+	nivel_eolica_upgrade = 1
+	nivel_geotermica_upgrade = 1
+	nivel_nuclear_upgrade = 1
+	nivel_fusao_upgrade = 1
+	nivel_hidreletrica_upgrade = 1
+	nivel_carvao_upgrade = 1
+	nivel_biomassa_upgrade = 1
+	
+	tecnicos_manutencao = 0
+	tecnicos_ambientais = 0
+	filtro_carvao_ativo = false
+	captura_carbono_ativa = false
+	
+	saude = {
+		"solar": 100.0, "eolica": 100.0, "geotermica": 100.0,
+		"nuclear": 100.0, "fusao": 100.0, "hidreletrica": 100.0, "carvao": 100.0, "biomassa": 100.0, 
+	}
+	
+	precos = PRECO_BASE.duplicate()
+	bonus_conquistas.clear()
+	
 	recalcular_tudo()
+	cidade_mudou.emit()
 	return true
 
 func calcular_capacidade_maxima() -> float:
