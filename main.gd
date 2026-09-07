@@ -38,6 +38,8 @@ var rng = RandomNumberGenerator.new()
 @onready var label_conquista: Label = $TopHUD/VBoxTop/LabelConquista
 @onready var label_poluicao: Label = $TopHUD/VBoxTop/LabelPoluicao
 @onready var label_cidade: Label = $TopHUD/VBoxTop/LabelCidade
+@onready var label_titulo_saude: Label = $TopHUD/VBoxSaude/LabelTituloSaude
+@onready var lista_saude_hud: VBoxContainer = $TopHUD/VBoxSaude/ListaSaudeHUD
 @onready var botao_manivela: Button = $BotaoManivela
 @onready var botao_abrir_loja: Button = $BotoesPrincipais/BotaoAbrirLoja
 @onready var botao_abrir_upgrades: Button = $BotoesPrincipais/BotaoAbrirUpgrades
@@ -141,6 +143,7 @@ func atualizar_interface() -> void:
 	atualizar_cidade()
 	atualizar_loja()
 	atualizar_upgrades()
+	atualizar_saude_hud()  # ← ADICIONA ESSA LINHA
 	if painel_manutencao and painel_manutencao.visible:
 		atualizar_manutencao()
 
@@ -172,6 +175,43 @@ func atualizar_poluicao():
 		label_poluicao.text += " (Solar -%.0f%%)" % (GameState.poluicao * 0.5)
 	if GameState.tecnicos_ambientais > 0:
 		label_poluicao.text += " | 🌿 %d técnicos" % GameState.tecnicos_ambientais
+
+func atualizar_saude_hud():
+	if not lista_saude_hud: return
+	
+	# Limpa labels antigas
+	for child in lista_saude_hud.get_children():
+		child.queue_free()
+	
+	# Lista de geradores pra mostrar
+	var tipos = ["solar", "eolica", "carvao", "geotermica", "biomassa", "hidreletrica", "nuclear", "fusao"]
+	
+	for tipo in tipos:
+		var qtd = GameState.get_quantidade(tipo)
+		if qtd <= 0: continue  # não mostra se não tem
+		
+		var saude = GameState.saude.get(tipo, 100.0)
+		var barra = "████" if saude > 70 else "██░░" if saude > 40 else "█░░░" if saude > 15 else "░░░░"
+		
+		var label = Label.new()
+		label.text = "%s x%d %s %.0f%%" % [tipo.capitalize(), qtd, barra, saude]
+
+		
+		# Cor baseada na saúde
+		if saude > 70:
+			label.modulate = Color(0.6, 1.0, 0.6)  # verde
+		elif saude > 40:
+			label.modulate = Color(1.0, 1.0, 0.6)  # amarelo
+		elif saude > 15:
+			label.modulate = Color(1.0, 0.7, 0.4)  # laranja
+		else:
+			label.modulate = Color(1.0, 0.4, 0.4)  # vermelho
+		
+		lista_saude_hud.add_child(label)
+	
+	# Mostra/esconde o título baseado se tem geradores
+	if label_titulo_saude:
+		label_titulo_saude.visible = lista_saude_hud.get_child_count() > 0
 
 func atualizar_cidade():
 	if not label_cidade: return
