@@ -28,7 +28,7 @@ const DEMANDA_INICIAL: float = 5.0
 
 # --- BALANCEAMENTO - mexe aqui pra testar ---
 const CAPACIDADE_POR_TECNICO = 12
-const REPARO_BASE_POR_TECNICO = 1.2 # % total por segundo
+const REPARO_BASE_POR_TECNICO = 3 # % total por segundo
 const DESGASTE_BASE = 0.35 # antes era 0.08, por isso não caia nunca
 const LIMPEZA_BASE_AMBIENTAL = 0.45
 
@@ -287,6 +287,55 @@ func pode_comprar(chave: String) -> bool:
 		"tecnico_manutencao": return get_total_geradores() >= 5
 		"tecnico_ambiental": return poluicao > 5 or usinas_carvao >= 1
 		_: return true
+		
+# --- COMPRA MÚLTIPLA ---
+
+func calcular_preco_total(chave: String, quantidade: int) -> float:
+	var preco_atual = precos.get(chave, 999999.0)
+	var preco_total = 0.0
+	var multiplicador = _get_multiplicador_preco(chave)
+	
+	for i in range(quantidade):
+		preco_total += preco_atual
+		preco_atual *= multiplicador
+	
+	return preco_total
+
+func _get_multiplicador_preco(chave: String) -> float:
+	match chave:
+		"carvao": return 1.12
+		"fusao": return 1.2
+		"up_manivela": return 1.8
+		"up_solar", "up_eolica", "up_biomassa": return 2.0
+		"up_carvao", "up_geotermica": return 2.2
+		"up_hidreletrica", "up_nuclear": return 2.5
+		"up_fusao": return 2.6
+		"tecnico_manutencao", "tecnico_ambiental": return 1.20
+		_: return 1.15
+
+func pode_comprar_quantidade(chave: String, quantidade: int) -> bool:
+	# Verifica pré-requisitos
+	if not pode_comprar(chave):
+		return false
+	
+	# Verifica se tem dinheiro pra quantidade total
+	var preco_total = calcular_preco_total(chave, quantidade)
+	if ouro < preco_total:
+		return false
+	
+	return true
+
+func comprar_quantidade(chave: String, quantidade: int) -> bool:
+	var comprado = false
+	
+	for i in range(quantidade):
+		if pode_comprar(chave):
+			comprar(chave)
+			comprado = true
+		else:
+			break  # para se não puder mais comprar
+	
+	return comprado
 
 func get_total_geradores() -> int:
 	return paineis_solares + turbinas_eolicas + usinas_geotermicas + reatores_nucleares + reatores_fusao + hidreletricas + usinas_carvao + usinas_biomassa
@@ -491,7 +540,7 @@ func desgastar(delta: float, clima_atual: int):
 		danificados.sort_custom(func(a, b): return a.saude < b.saude)
 		
 		# Poder de reparo total disponível (multiplicador 2.5 de eficiência)
-		var reparo_restante = poder_total * 2.5
+		var reparo_restante = poder_total * 3.0
 		
 		for item in danificados:
 			if reparo_restante <= 0:
@@ -509,6 +558,7 @@ func desgastar(delta: float, clima_atual: int):
 				var reparo_por_unidade = reparo_restante / item.qtd
 				saude[item.tipo] = min(100.0, saude[item.tipo] + reparo_por_unidade)
 				reparo_restante = 0
+				
 
 func reparar(tipo: String) -> bool:
 	var qtd = get_quantidade(tipo)
@@ -539,7 +589,8 @@ func reparar(tipo: String) -> bool:
 	saude[tipo] = 100.0
 	recurso_mudou.emit()
 	return true
-
+	
+	
 # Dicionários de Descrições para UI Mobile
 const DESCRICOES_GERADORES = {
 	"solar": "Painel fotovoltaico. Para de gerar à noite.",
