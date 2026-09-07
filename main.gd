@@ -435,7 +435,6 @@ func atualizar_upgrades() -> void:
 			]
 			botao_upgrade_fusao.disabled = not GameState.pode_comprar("up_fusao")
 
-# --- NOVO: versão otimizada — cria nós UMA VEZ, só atualiza texto ---
 func atualizar_manutencao():
 	if not lista_manutencao: return
 	

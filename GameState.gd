@@ -472,26 +472,43 @@ func desgastar(delta: float, clima_atual: int):
 		var taxa = DESGASTE_BASE * fator_clima * fator_tipo * fator_qtd * delta
 		saude[tipo] = max(0.0, saude[tipo] - taxa)
 
-	# REPARO - só funciona bem se não estiver sobrecarregado
+	# REPARO PRIORITÁRIO - foca no mais danificado primeiro
 	if tecnicos_manutencao > 0 and tipos_ativos.size() > 0:
-		var bonus = 1.0 + min((tecnicos_manutencao - 1) * 0.08, 0.4) # cap 40%
+		var bonus = 1.0 + min((tecnicos_manutencao - 1) * 0.08, 0.4)
 		var poder_total = tecnicos_manutencao * REPARO_BASE_POR_TECNICO * bonus * eficiencia_sobrecarga * delta
 		
+		# Lista de geradores danificados, ordenados do mais danificado pro menos
 		var danificados = []
 		for t in tipos_ativos:
 			if saude[t] < 99.9:
-				danificados.append(t)
+				danificados.append({
+					"tipo": t,
+					"saude": saude[t],
+					"qtd": get_quantidade(t)
+				})
 		
-		if danificados.size() > 0:
-			var total_danificado_qtd = 0
-			for t in danificados:
-				total_danificado_qtd += get_quantidade(t)
+		# Ordena: menor saúde primeiro (mais danificado = prioridade)
+		danificados.sort_custom(func(a, b): return a.saude < b.saude)
+		
+		# Poder de reparo total disponível (multiplicador 2.5 de eficiência)
+		var reparo_restante = poder_total * 2.5
+		
+		for item in danificados:
+			if reparo_restante <= 0:
+				break
 			
-			for t in danificados:
-				var peso = float(get_quantidade(t)) / float(total_danificado_qtd)
-				# reparo proporcional à quantidade daquele tipo
-				var reparo = poder_total * peso * 2.5
-				saude[t] = min(100.0, saude[t] + reparo)
+			var dano = 100.0 - item.saude
+			var reparo_necessario = dano * item.qtd  # precisa reparar todas as unidades
+			
+			if reparo_restante >= reparo_necessario:
+				# Consegue reparar COMPLETAMENTE esse tipo
+				saude[item.tipo] = 100.0
+				reparo_restante -= reparo_necessario
+			else:
+				# Repara PARCIALMENTE (distribui entre as unidades desse tipo)
+				var reparo_por_unidade = reparo_restante / item.qtd
+				saude[item.tipo] = min(100.0, saude[item.tipo] + reparo_por_unidade)
+				reparo_restante = 0
 
 func reparar(tipo: String) -> bool:
 	var qtd = get_quantidade(tipo)
