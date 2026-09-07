@@ -1,4 +1,4 @@
-# AchievementManager.gd - V2 com 10/25/50 para TODOS os geradores
+# AchievementManager.gd - V3 com UI otimizada (cria uma vez, atualiza sempre)
 extends Node
 
 signal conquista_desbloqueada(mensagem: String)
@@ -12,7 +12,7 @@ const CONQUISTAS: Array[Dictionary] = [
 	{"chave": "eolica_10", "nome": "Vento Forte I", "desc": "10 Turbinas", "tipo": "eolica", "meta": 10, "bonus": "producao_eolica"},
 	{"chave": "eolica_25", "nome": "Vento Forte II", "desc": "25 Turbinas", "tipo": "eolica", "meta": 25, "bonus": "producao_eolica"},
 	{"chave": "eolica_50", "nome": "Vento Forte III", "desc": "50 Turbinas", "tipo": "eolica", "meta": 50, "bonus": "producao_eolica"},
-	# Carvão - sujo mas barato
+	# Carvão
 	{"chave": "carvao_10", "nome": "Rei do Carvão I", "desc": "10 Usinas a Carvão", "tipo": "carvao", "meta": 10, "bonus": "producao_carvao"},
 	{"chave": "carvao_25", "nome": "Rei do Carvão II", "desc": "25 Usinas a Carvão", "tipo": "carvao", "meta": 25, "bonus": "producao_carvao"},
 	{"chave": "carvao_50", "nome": "Rei do Carvão III", "desc": "50 Usinas a Carvão", "tipo": "carvao", "meta": 50, "bonus": "producao_carvao"},
@@ -20,7 +20,7 @@ const CONQUISTAS: Array[Dictionary] = [
 	{"chave": "geotermica_10", "nome": "Calor da Terra I", "desc": "10 Geotérmicas", "tipo": "geotermica", "meta": 10, "bonus": "producao_geotermica"},
 	{"chave": "geotermica_25", "nome": "Calor da Terra II", "desc": "25 Geotérmicas", "tipo": "geotermica", "meta": 25, "bonus": "producao_geotermica"},
 	{"chave": "geotermica_50", "nome": "Calor da Terra III", "desc": "50 Geotérmicas", "tipo": "geotermica", "meta": 50, "bonus": "producao_geotermica"},
-	# Biomassa - limpa
+	# Biomassa
 	{"chave": "biomassa_10", "nome": "Eco Warrior I", "desc": "10 Biomassa", "tipo": "biomassa", "meta": 10, "bonus": "producao_biomassa"},
 	{"chave": "biomassa_25", "nome": "Eco Warrior II", "desc": "25 Biomassa", "tipo": "biomassa", "meta": 25, "bonus": "producao_biomassa"},
 	{"chave": "biomassa_50", "nome": "Eco Warrior III", "desc": "50 Biomassa", "tipo": "biomassa", "meta": 50, "bonus": "producao_biomassa"},
@@ -32,12 +32,10 @@ const CONQUISTAS: Array[Dictionary] = [
 	{"chave": "nuclear_10", "nome": "Átomo I", "desc": "10 Reatores", "tipo": "nuclear", "meta": 10, "bonus": "producao_nuclear"},
 	{"chave": "nuclear_25", "nome": "Átomo II", "desc": "25 Reatores", "tipo": "nuclear", "meta": 25, "bonus": "producao_nuclear"},
 	{"chave": "nuclear_50", "nome": "Átomo III", "desc": "50 Reatores", "tipo": "nuclear", "meta": 50, "bonus": "producao_nuclear"},
-	
-	# Fusao
+	# Fusão
 	{"chave": "fusao_10", "nome": "Poder das Estrelas I", "desc": "10 Reatores de Fusão", "tipo": "fusao", "meta": 10, "bonus": "producao_fusao"},
 	{"chave": "fusao_25", "nome": "Poder das Estrelas II", "desc": "25 Reatores de Fusão", "tipo": "fusao", "meta": 25, "bonus": "producao_fusao"},
 	{"chave": "fusao_50", "nome": "Poder das Estrelas III", "desc": "50 Reatores de Fusão", "tipo": "fusao", "meta": 50, "bonus": "producao_fusao"},
-	
 	# Bateria
 	{"chave": "bateria_10", "nome": "Reserva I", "desc": "10 Baterias", "tipo": "bateria", "meta": 10, "bonus": "capacidade_bateria"},
 	{"chave": "bateria_25", "nome": "Reserva II", "desc": "25 Baterias", "tipo": "bateria", "meta": 25, "bonus": "capacidade_bateria"},
@@ -48,6 +46,9 @@ const CONQUISTAS: Array[Dictionary] = [
 ]
 
 var desbloqueadas: Dictionary = {}
+
+# --- NOVO: array pra guardar as labels (criadas UMA VEZ) ---
+var _labels_conquistas: Array[Label] = []
 
 func _ready() -> void:
 	for c in CONQUISTAS:
@@ -67,23 +68,44 @@ func _desbloquear(conquista: Dictionary) -> void:
 	GameState.aplicar_bonus_conquista(conquista.bonus)
 	conquista_desbloqueada.emit("Marco: %s! %s - Produção dobrou!" % [conquista.nome, conquista.desc])
 
+# --- NOVO: cria as labels UMA VEZ e guarda no array ---
 func renderizar_lista(container: VBoxContainer) -> void:
+	# Se já criamos as labels antes, só atualiza o texto
+	if _labels_conquistas.size() == CONQUISTAS.size():
+		_atualizar_labels()
+		return
+	
+	# Primeira vez: limpa e cria tudo
 	for child in container.get_children():
 		child.queue_free()
+	_labels_conquistas.clear()
+	
 	for item in CONQUISTAS:
-		var eh_desbloqueado: bool = desbloqueadas[item.chave]
-		var qtd_atual: int = GameState.get_quantidade(item.tipo)
 		var label_item = Label.new()
 		label_item.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		label_item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		container.add_child(label_item)
+		_labels_conquistas.append(label_item)
+	
+	_atualizar_labels()
+
+# --- NOVO: só atualiza o texto das labels já criadas ---
+func _atualizar_labels() -> void:
+	for i in CONQUISTAS.size():
+		var item = CONQUISTAS[i]
+		var label_item = _labels_conquistas[i]
+		var eh_desbloqueado: bool = desbloqueadas[item.chave]
+		var qtd_atual: int = GameState.get_quantidade(item.tipo)
+		
 		if eh_desbloqueado:
 			label_item.text = "✅ %s [CONCLUÍDO]\n   %s\n " % [item.nome, item.desc]
 			label_item.modulate = Color(0.6, 1.0, 0.6)
 		else:
 			label_item.text = "🔒 %s (%d/%d)\n   %s\n " % [item.nome, mini(qtd_atual, item.meta), item.meta, item.desc]
 			label_item.modulate = Color(1, 1, 1, 0.7)
-		container.add_child(label_item)
-		
+
 func resetar_conquistas():
 	for c in CONQUISTAS:
 		desbloqueadas[c.chave] = false
+	# --- NOVO: limpa as labels pra recriar na próxima vez ---
+	_labels_conquistas.clear()

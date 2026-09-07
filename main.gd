@@ -2,7 +2,7 @@ extends Node2D
 
 #Aumentar velocidade para testar o game, remover na fase final
 const MODO_TESTE = true
-const VELOCIDADE_TESTE = 5.0 # 5x mais rápido
+const VELOCIDADE_TESTE = 1 # 5x mais rápido
 
 enum Clima { NORMAL, TEMPESTADE, ECLIPSE, ONDA_DE_CALOR, SECA }
 
@@ -73,6 +73,17 @@ var rng = RandomNumberGenerator.new()
 @onready var botao_upgrade_nuclear: Button = $PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeNuclear
 @onready var botao_upgrade_fusao: Button = $PainelUpgrades/VBoxContainer/ScrollUpgrades/ListaUpgrades/BotaoUpgradeFusao
 
+# --- NOVO: variáveis pra guardar os nós da manutenção (criados UMA VEZ) ---
+var _manut_label_pol: Label
+var _manut_btn_filtro: Button
+var _manut_btn_captura: Button
+var _manut_btn_tec_amb: Button
+var _manut_label_titulo: Label
+var _manut_btn_tecnico: Button
+var _manut_labels_saude: Dictionary = {}   # tipo -> Label
+var _manut_btns_reparo: Dictionary = {}    # tipo -> Button
+var _manut_inicializado: bool = false
+
 func _ready() -> void:
 	rng.randomize()
 	if label_blackout: label_blackout.visible = false
@@ -100,8 +111,8 @@ func _ready() -> void:
 		print(">>> MODO TESTE ATIVO <<<")
 		if has_node("Timer"):
 			$Timer.wait_time = $Timer.wait_time / VELOCIDADE_TESTE
-		GameState.ouro = 50000
-		GameState.energia_armazenada = GameState.calcular_capacidade_maxima()
+		GameState.ouro = 0
+		#GameState.energia_armazenada = GameState.calcular_capacidade_maxima()
 		if label_blackout:
 			label_blackout.text = "[TESTE %dx] %s" % [VELOCIDADE_TESTE, label_blackout.text]
 			label_blackout.visible = true
@@ -384,13 +395,69 @@ func atualizar_upgrades() -> void:
 			]
 			botao_upgrade_fusao.disabled = not GameState.pode_comprar("up_fusao")
 
+# --- NOVO: versão otimizada — cria nós UMA VEZ, só atualiza texto ---
 func atualizar_manutencao():
 	if not lista_manutencao: return
+	
+	# Primeira vez que abre: cria todos os nós
+	if not _manut_inicializado:
+		_criar_nos_manutencao()
+		_manut_inicializado = true
+	
+	# Atualiza só o texto dos nós que já existem
+	_atualizar_textos_manutencao()
+
+# --- NOVO: cria os nós UMA VEZ ---
+func _criar_nos_manutencao():
+	# Limpa qualquer coisa que tenha sobrado
 	for child in lista_manutencao.get_children():
 		child.queue_free()
-
+	_manut_labels_saude.clear()
+	_manut_btns_reparo.clear()
+	
 	# --- POLUIÇÃO ---
-	var label_titulo_pol = Label.new()
+	_manut_label_pol = Label.new()
+	_manut_label_pol.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lista_manutencao.add_child(_manut_label_pol)
+	
+	_manut_btn_filtro = Button.new()
+	_manut_btn_filtro.pressed.connect(func(): _comprar("filtro_carvao"))
+	lista_manutencao.add_child(_manut_btn_filtro)
+	
+	_manut_btn_captura = Button.new()
+	_manut_btn_captura.pressed.connect(func(): _comprar("captura_carbono"))
+	lista_manutencao.add_child(_manut_btn_captura)
+	
+	_manut_btn_tec_amb = Button.new()
+	_manut_btn_tec_amb.pressed.connect(func(): _comprar("tecnico_ambiental"))
+	lista_manutencao.add_child(_manut_btn_tec_amb)
+	
+	var separador = HSeparator.new()
+	lista_manutencao.add_child(separador)
+	
+	# --- SAÚDE ---
+	_manut_label_titulo = Label.new()
+	_manut_label_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lista_manutencao.add_child(_manut_label_titulo)
+	
+	_manut_btn_tecnico = Button.new()
+	_manut_btn_tecnico.pressed.connect(func(): _comprar("tecnico_manutencao"))
+	lista_manutencao.add_child(_manut_btn_tecnico)
+	
+	# Labels e botões de reparo pra cada tipo de gerador
+	for tipo in ["solar", "eolica", "carvao", "geotermica", "biomassa", "hidreletrica", "nuclear", "fusao"]:
+		var label = Label.new()
+		lista_manutencao.add_child(label)
+		_manut_labels_saude[tipo] = label
+		
+		var btn_rep = Button.new()
+		btn_rep.pressed.connect(func(): reparar_tipo(tipo))
+		lista_manutencao.add_child(btn_rep)
+		_manut_btns_reparo[tipo] = btn_rep
+
+# --- NOVO: só atualiza o texto dos nós ---
+func _atualizar_textos_manutencao():
+	# --- POLUIÇÃO ---
 	var prod_atual = 0.0
 	for tipo in GameState.POLUICAO_POR_GERADOR.keys():
 		var qtd = GameState.get_quantidade(tipo)
@@ -399,88 +466,76 @@ func atualizar_manutencao():
 	var limpeza_amb = 0.0
 	if GameState.tecnicos_ambientais > 0:
 		var bonus_amb = 1.0 + min((GameState.tecnicos_ambientais - 1) * 0.08, 0.4)
-		# usa a constante nova se existir, se não usa 0.45
 		var base_amb = GameState.LIMPEZA_BASE_AMBIENTAL if "LIMPEZA_BASE_AMBIENTAL" in GameState else 0.45
 		limpeza_amb = GameState.tecnicos_ambientais * base_amb * bonus_amb
 	
-	label_titulo_pol.text = "--- POLUIÇÃO ---\nPoluição: %.0f%% (%.1f/s) | 🌿 %d limpam %.1f/s" % [
+	_manut_label_pol.text = "--- POLUIÇÃO ---\nPoluição: %.0f%% (%.1f/s) | 🌿 %d limpam %.1f/s" % [
 		GameState.poluicao, prod_atual - limpeza_amb, GameState.tecnicos_ambientais, limpeza_amb
 	]
-	label_titulo_pol.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lista_manutencao.add_child(label_titulo_pol)
-
-	var btn_filtro = Button.new()
-	btn_filtro.text = "Filtro Carvão ($%d) [%s]" % [int(GameState.get_preco("filtro_carvao")), "ON" if GameState.filtro_carvao_ativo else "OFF"]
-	btn_filtro.disabled = not GameState.pode_comprar("filtro_carvao")
-	btn_filtro.pressed.connect(func(): _comprar("filtro_carvao"))
-	lista_manutencao.add_child(btn_filtro)
-
-	var btn_captura = Button.new()
-	btn_captura.text = "Captura Carbono ($%d) [%s]" % [int(GameState.get_preco("captura_carbono")), "ON" if GameState.captura_carbono_ativa else "OFF"]
-	btn_captura.disabled = not GameState.pode_comprar("captura_carbono")
-	btn_captura.pressed.connect(func(): _comprar("captura_carbono"))
-	lista_manutencao.add_child(btn_captura)
-
-	var btn_tec_amb = Button.new()
-	btn_tec_amb.text = "🌿 Técnico Ambiental ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_ambiental")), GameState.tecnicos_ambientais]
-	btn_tec_amb.disabled = not GameState.pode_comprar("tecnico_ambiental")
-	btn_tec_amb.pressed.connect(func(): _comprar("tecnico_ambiental"))
-	lista_manutencao.add_child(btn_tec_amb)
-
-	var separador = HSeparator.new()
-	lista_manutencao.add_child(separador)
-
-	# --- SAÚDE - UMA LABEL SÓ ---
-	var total_geradores = GameState.get_total_geradores()
 	
+	_manut_btn_filtro.text = "Filtro Carvão ($%d) [%s]" % [int(GameState.get_preco("filtro_carvao")), "ON" if GameState.filtro_carvao_ativo else "OFF"]
+	_manut_btn_filtro.disabled = not GameState.pode_comprar("filtro_carvao")
+	
+	_manut_btn_captura.text = "Captura Carbono ($%d) [%s]" % [int(GameState.get_preco("captura_carbono")), "ON" if GameState.captura_carbono_ativa else "OFF"]
+	_manut_btn_captura.disabled = not GameState.pode_comprar("captura_carbono")
+	
+	_manut_btn_tec_amb.text = "🌿 Técnico Ambiental ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_ambiental")), GameState.tecnicos_ambientais]
+	_manut_btn_tec_amb.disabled = not GameState.pode_comprar("tecnico_ambiental")
+	
+	# --- SAÚDE ---
+	var total_geradores = GameState.get_total_geradores()
 	var cap_por_tec = GameState.CAPACIDADE_POR_TECNICO if "CAPACIDADE_POR_TECNICO" in GameState else 12
 	var base_reparo = GameState.REPARO_BASE_POR_TECNICO if "REPARO_BASE_POR_TECNICO" in GameState else 1.2
-	
 	var capacidade = GameState.tecnicos_manutencao * cap_por_tec
 	var eficiencia = 1.0
 	if total_geradores > 0 and capacidade > 0:
 		eficiencia = min(1.0, float(capacidade) / float(total_geradores))
 		if total_geradores > capacidade * 2:
 			eficiencia *= 0.6
-
+	
 	var bonus_manut = 1.0
 	if GameState.tecnicos_manutencao > 0:
 		bonus_manut = 1.0 + min((GameState.tecnicos_manutencao - 1) * 0.08, 0.4)
 	
 	var poder_total = GameState.tecnicos_manutencao * base_reparo * bonus_manut * eficiencia
 	var status = "OK" if eficiencia >= 0.9 else "SOBRECARREGADO!" if eficiencia < 0.5 else "ATENÇÃO"
-
-	var label_titulo_manut = Label.new()
-	label_titulo_manut.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label_titulo_manut.text = "--- SAÚDE (%d Estruturas) ---\n🔧 %d técnicos (cap %d) | Eficiência: %.0f%% [%s]\nReparo total: %.2f%%/s" % [
+	
+	_manut_label_titulo.text = "--- SAÚDE (%d Estruturas) ---\n🔧 %d técnicos (cap %d) | Eficiência: %.0f%% [%s]\nReparo total: %.2f%%/s" % [
 		total_geradores, GameState.tecnicos_manutencao, capacidade, eficiencia * 100.0, status, poder_total
 	]
-	lista_manutencao.add_child(label_titulo_manut)
-
-	var btn_tecnico = Button.new()
-	btn_tecnico.text = "🔧 Contratar Técnico ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_manutencao")), GameState.tecnicos_manutencao]
-	btn_tecnico.disabled = not GameState.pode_comprar("tecnico_manutencao")
-	btn_tecnico.pressed.connect(func(): _comprar("tecnico_manutencao"))
-	lista_manutencao.add_child(btn_tecnico)
-
+	
+	_manut_btn_tecnico.text = "🔧 Contratar Técnico ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_manutencao")), GameState.tecnicos_manutencao]
+	_manut_btn_tecnico.disabled = not GameState.pode_comprar("tecnico_manutencao")
+	
+	# Labels e botões de cada gerador
+	var custo_base_dict = {"solar":5, "eolica":8, "carvao":15, "geotermica":20, "biomassa":10, "hidreletrica":40, "nuclear":100, "fusao":200}
+	
 	for tipo in ["solar", "eolica", "carvao", "geotermica", "biomassa", "hidreletrica", "nuclear", "fusao"]:
 		var qtd = GameState.get_quantidade(tipo)
-		if qtd <= 0: continue
+		var label = _manut_labels_saude[tipo]
+		var btn_rep = _manut_btns_reparo[tipo]
+		
+		if qtd <= 0:
+			# Esconde se não tem esse gerador
+			label.visible = false
+			btn_rep.visible = false
+			continue
+		
+		label.visible = true
 		var saude = GameState.saude.get(tipo, 100.0)
 		var barra = "████" if saude > 70 else "██░░" if saude > 40 else "█░░░" if saude > 15 else "░░░░"
-		var label = Label.new()
 		label.text = "%s x%d - %s %.0f%%" % [tipo.capitalize(), qtd, barra, saude]
-		lista_manutencao.add_child(label)
+		
 		if saude < 95:
-			var btn_rep = Button.new()
-			var custo_base = {"solar":5, "eolica":8, "carvao":15, "geotermica":20, "biomassa":10, "hidreletrica":40, "nuclear":100, "fusao":200}.get(tipo, 5)
+			btn_rep.visible = true
+			var custo_base = custo_base_dict.get(tipo, 5)
 			var dano = 100.0 - saude
 			var custo = int(qtd * custo_base * (dano / 100.0))
 			custo = max(custo, int(custo_base * 0.2))
 			btn_rep.text = "🔧 Consertar %s ($%d)" % [tipo.capitalize(), custo]
 			btn_rep.disabled = GameState.ouro < custo
-			btn_rep.pressed.connect(func(): reparar_tipo(tipo))
-			lista_manutencao.add_child(btn_rep)
+		else:
+			btn_rep.visible = false
 
 func reparar_tipo(tipo: String):
 	if GameState.reparar(tipo):
@@ -522,7 +577,7 @@ func _on_botao_manivela_pressed() -> void:
 		GameState.energia_armazenada += GameState.poder_manivela
 
 func _on_timer_timeout() -> void:
-	var delta = 1.0
+	var delta = $Timer.wait_time  # usa o tempo REAL do timer
 	tempo_ciclo += 1
 	tempo_jogo += 1
 	
@@ -542,8 +597,24 @@ func _on_timer_timeout() -> void:
 			sortear_evento_climatico()
 			tempo_proximo_evento = rng.randi_range(20, 40)
 	
-	if tempo_jogo % 20 == 0 and not GameState.em_blackout:
-		GameState.demanda_cidade = min(GameState.demanda_cidade * 1.12, GameState.get_cap_atual())
+	if tempo_jogo % 15 == 0 and not GameState.em_blackout:
+		# Taxa base de crescimento (Opção A)
+		var taxa_crescimento = 1.18
+		
+		# Só verifica excedente À NOITE (quando solar tá OFF)
+		# Assim a oferta representa a capacidade REAL do jogador
+		if not eh_dia and GameState.oferta_atual > 0 and GameState.demanda_cidade > 0:
+			var razao = GameState.oferta_atual / GameState.demanda_cidade
+			
+			if razao >= 5.0:
+				# Oferta 5x maior → demanda corre atrás forte
+				taxa_crescimento = 1.30
+			elif razao >= 3.0:
+				# Oferta 3x maior → demanda acelera moderadamente
+				taxa_crescimento = 1.25
+			# Senão: mantém 1.18 (normal)
+		
+		GameState.demanda_cidade = min(GameState.demanda_cidade * taxa_crescimento, GameState.get_cap_atual())
 
 	if tempo_ciclo >= duracao_ciclo:
 		tempo_ciclo = 0
@@ -617,6 +688,8 @@ func _on_botao_migrar_cidade_pressed() -> void:
 	if GameState.migrar_cidade():
 		if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
 			achievement_manager.resetar_conquistas()
+		# --- NOVO: reseta a UI de manutenção pra recriar na próxima vez ---
+		_manut_inicializado = false
 		atualizar_interface()
 
 func _comprar(tipo: String):
