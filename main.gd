@@ -96,6 +96,9 @@ var _manut_inicializado: bool = false
 var _estat_label_tempo: Label
 var _estat_label_producao: Label
 var _estat_label_poluicao: Label
+var _estat_label_saude_titulo: Label
+var _estat_labels_saude: Dictionary = {}  # tipo -> Label
+var _estat_label_tecnicos: Label
 var _estat_label_geral: Label
 var _estat_inicializado: bool = false
 
@@ -324,11 +327,13 @@ func _criar_nos_estatisticas():
 	# Limpa qualquer coisa antiga
 	for child in lista_estatisticas.get_children():
 		child.queue_free()
+	_estat_labels_saude.clear()
 	
 	# --- TEMPO ---
 	_estat_label_tempo = Label.new()
 	_estat_label_tempo.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_estat_label_tempo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estat_label_tempo.size_flags_vertical = Control.SIZE_FILL
 	lista_estatisticas.add_child(_estat_label_tempo)
 	
 	var sep1 = HSeparator.new()
@@ -339,6 +344,7 @@ func _criar_nos_estatisticas():
 	_estat_label_producao = Label.new()
 	_estat_label_producao.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_estat_label_producao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estat_label_producao.size_flags_vertical = Control.SIZE_FILL
 	lista_estatisticas.add_child(_estat_label_producao)
 	
 	var sep2 = HSeparator.new()
@@ -349,16 +355,47 @@ func _criar_nos_estatisticas():
 	_estat_label_poluicao = Label.new()
 	_estat_label_poluicao.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_estat_label_poluicao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estat_label_poluicao.size_flags_vertical = Control.SIZE_FILL
 	lista_estatisticas.add_child(_estat_label_poluicao)
 	
 	var sep3 = HSeparator.new()
 	sep3.custom_minimum_size.y = 10
 	lista_estatisticas.add_child(sep3)
 	
+	# --- SAÚDE ---
+	_estat_label_saude_titulo = Label.new()
+	_estat_label_saude_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_estat_label_saude_titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estat_label_saude_titulo.size_flags_vertical = Control.SIZE_FILL
+	_estat_label_saude_titulo.text = "❤️ SAÚDE DOS GERADORES\n"
+	lista_estatisticas.add_child(_estat_label_saude_titulo)
+	
+	# Cria labels para cada tipo de gerador
+	var tipos_geradores = ["solar", "eolica", "carvao", "geotermica", "biomassa", "hidreletrica", "nuclear", "fusao"]
+	for tipo in tipos_geradores:
+		var label = Label.new()
+		label.autowrap_mode = TextServer.AUTOWRAP_WORD
+		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		label.size_flags_vertical = Control.SIZE_FILL
+		lista_estatisticas.add_child(label)
+		_estat_labels_saude[tipo] = label
+	
+	# Label dos técnicos
+	_estat_label_tecnicos = Label.new()
+	_estat_label_tecnicos.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_estat_label_tecnicos.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estat_label_tecnicos.size_flags_vertical = Control.SIZE_FILL
+	lista_estatisticas.add_child(_estat_label_tecnicos)
+	
+	var sep4 = HSeparator.new()
+	sep4.custom_minimum_size.y = 10
+	lista_estatisticas.add_child(sep4)
+	
 	# --- GERAL ---
 	_estat_label_geral = Label.new()
 	_estat_label_geral.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_estat_label_geral.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_estat_label_geral.size_flags_vertical = Control.SIZE_FILL
 	lista_estatisticas.add_child(_estat_label_geral)
 	
 	# Atualiza pela primeira vez
@@ -430,6 +467,44 @@ func _atualizar_textos_estatisticas():
 		var limpeza = GameState.tecnicos_ambientais * GameState.LIMPEZA_BASE_AMBIENTAL * bonus_amb
 		_estat_label_poluicao.text += "🌿 Limpeza: %.2f/s (%d técnicos)\n" % [limpeza, GameState.tecnicos_ambientais]
 	
+		# --- ATUALIZA SAÚDE ---
+	
+	for tipo in tipos_geradores:
+		var label = _estat_labels_saude[tipo]
+		var qtd = GameState.get_quantidade(tipo)
+		
+		if qtd <= 0:
+			label.visible = false
+			continue
+		
+		label.visible = true
+		var saude_atual = GameState.saude.get(tipo, 100.0)
+		var barra = "████" if saude_atual > 70 else "██░░" if saude_atual > 40 else "█░░░" if saude_atual > 15 else "░░░░"
+		label.text = "%s x%d - %s %.0f%%" % [tipo.capitalize(), qtd, barra, saude_atual]
+		
+		# Cor baseada na saúde
+		if saude_atual > 70:
+			label.modulate = Color(0.6, 1.0, 0.6)  # verde
+		elif saude_atual > 40:
+			label.modulate = Color(1.0, 1.0, 0.6)  # amarelo
+		elif saude_atual > 15:
+			label.modulate = Color(1.0, 0.7, 0.4)  # laranja
+		else:
+			label.modulate = Color(1.0, 0.4, 0.4)  # vermelho
+	
+	# Atualiza técnicos
+	if GameState.tecnicos_manutencao > 0:
+		var cap_por_tec = GameState.CAPACIDADE_POR_TECNICO if "CAPACIDADE_POR_TECNICO" in GameState else 12
+		var base_reparo = GameState.REPARO_BASE_POR_TECNICO if "REPARO_BASE_POR_TECNICO" in GameState else 1.2
+		var capacidade = GameState.tecnicos_manutencao * cap_por_tec
+		var bonus_manut = 1.0 + min((GameState.tecnicos_manutencao - 1) * 0.08, 0.4)
+		var poder_total = GameState.tecnicos_manutencao * base_reparo * bonus_manut
+		
+		_estat_label_tecnicos.visible = true
+		_estat_label_tecnicos.text = "\n🔧 Técnicos: %d (cap: %d)\n" % [GameState.tecnicos_manutencao, capacidade]
+		_estat_label_tecnicos.text += " Reparo: %.2f%%/s\n" % poder_total
+	else:
+		_estat_label_tecnicos.visible = false
 	# --- GERAL ---
 	_estat_label_geral.text = "📊 ESTATÍSTICAS GERAIS\n"
 	_estat_label_geral.text += "💰 Ouro atual: $%d\n" % int(GameState.ouro)
