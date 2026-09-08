@@ -433,13 +433,18 @@ func _atualizar_textos_estatisticas():
 		var producao_total_tipo = producao_unit * qtd
 		total_producao += producao_total_tipo
 		
-		var eh_dia_str = ""
+		# Mostra produção dia/noite para solar, só atual para os outros
 		if tipo == "solar":
-			eh_dia_str = " [DIA]" if eh_dia else " [NOITE]"
-		_estat_label_producao.text += "%s x%d: %.1f MW/s%s\n" % [tipo.capitalize(), qtd, producao_total_tipo, eh_dia_str]
+			var producao_dia = producao_total_tipo
+			var producao_noite = 0.0  # solar não produz à noite
+			_estat_label_producao.text += "%s x%d: %.1f MW/s [DIA] / %.1f MW/s [NOITE]\n" % [
+				tipo.capitalize(), qtd, producao_dia, producao_noite
+			]
+		else:
+			_estat_label_producao.text += "%s x%d: %.1f MW/s\n" % [tipo.capitalize(), qtd, producao_total_tipo]
 	
 	_estat_label_producao.text += "\n🔋 Total: %.1f MW/s\n" % total_producao
-	_estat_label_producao.text += "📦 Armazenado: %.1f / %.1f MW\n" % [GameState.energia_armazenada, GameState.calcular_capacidade_maxima()]
+	_estat_label_producao.text += " Armazenado: %.1f / %.1f MW\n" % [GameState.energia_armazenada, GameState.calcular_capacidade_maxima()]
 	
 	# --- POLUIÇÃO ---
 	_estat_label_poluicao.text = "☢️ POLUIÇÃO (por segundo)\n"
