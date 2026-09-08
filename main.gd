@@ -111,6 +111,7 @@ func _ready() -> void:
 	if botao_abrir_estatisticas: botao_abrir_estatisticas.visible = false
 	if painel_estatisticas: painel_estatisticas.visible = false
 	
+	
 	if GameState.has_signal("recurso_mudou"):
 		GameState.recurso_mudou.connect(atualizar_interface)
 		GameState.producao_mudou.connect(atualizar_interface)
@@ -126,6 +127,10 @@ func _ready() -> void:
 	# --- BOTÕES DE QUANTIDADE ---
 	_criar_botoes_quantidade()
 	
+	print("DEBUG: PainelEstatisticas = ", $PainelEstatisticas)
+	print("DEBUG: ListaEstatisticas = ", $PainelEstatisticas/VBoxContainer/ScrollEstatisticas/ListaEstatisticas)
+
+
 	# --- MODO TESTE ---
 	if MODO_TESTE:
 		print(">>> MODO TESTE ATIVO <<<")
@@ -298,29 +303,34 @@ func atualizar_saude_hud():
 		label_titulo_saude.visible = lista_saude_hud.get_child_count() > 0
 		
 func atualizar_estatisticas():
-	if not lista_estatisticas: 
+	if not lista_estatisticas:
+		print("ERRO: lista_estatisticas é NULL!")
 		return
 	
-	# Limpa labels antigas
+	# Limpeza imediata - corrige o bug dos 14 labels
 	for child in lista_estatisticas.get_children():
-		child.queue_free()
+		lista_estatisticas.remove_child(child)
+		child.free()
 	
 	# --- TEMPO E PROGRESSO ---
 	var label_tempo = Label.new()
-	label_tempo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label_tempo.text = "⏱️ TEMPO DE JOGO\n"
+	label_tempo.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label_tempo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label_tempo.text = "⏱ TEMPO DE JOGO\n"
 	label_tempo.text += "Tempo total: %s\n" % _formatar_tempo(tempo_total_jogado)
 	label_tempo.text += "Cidade atual: %s (%d/9)\n" % [GameState.get_cidade_atual_info().nome, GameState.cidade_atual + 1]
 	label_tempo.text += "Eficiência global: %.0f%%\n" % (GameState.eficiencia_global * 100)
 	lista_estatisticas.add_child(label_tempo)
 	
 	var separador1 = HSeparator.new()
+	separador1.custom_minimum_size.y = 10
 	lista_estatisticas.add_child(separador1)
 	
 	# --- PRODUÇÃO POR GERADOR ---
 	var label_producao = Label.new()
-	label_producao.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label_producao.text = " PRODUÇÃO ATUAL (MW/s)\n"
+	label_producao.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label_producao.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label_producao.text = "⚡ PRODUÇÃO ATUAL (MW/s)\n"
 	
 	var tipos_geradores = ["solar", "eolica", "carvao", "geotermica", "biomassa", "hidreletrica", "nuclear", "fusao"]
 	var total_producao = 0.0
@@ -343,7 +353,9 @@ func atualizar_estatisticas():
 		var producao_total_tipo = producao_unit * qtd
 		total_producao += producao_total_tipo
 		
-		var eh_dia_str = "" if tipo != "solar" else (" [DIA]" if eh_dia else " [NOITE]")
+		var eh_dia_str = ""
+		if tipo == "solar":
+			eh_dia_str = " [DIA]" if eh_dia else " [NOITE]"
 		label_producao.text += "%s x%d: %.1f MW/s%s\n" % [tipo.capitalize(), qtd, producao_total_tipo, eh_dia_str]
 	
 	label_producao.text += "\n🔋 Total: %.1f MW/s\n" % total_producao
@@ -351,12 +363,14 @@ func atualizar_estatisticas():
 	lista_estatisticas.add_child(label_producao)
 	
 	var separador2 = HSeparator.new()
+	separador2.custom_minimum_size.y = 10
 	lista_estatisticas.add_child(separador2)
 	
 	# --- POLUIÇÃO POR GERADOR ---
-	var label_poluicao = Label.new()
-	label_poluicao.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label_poluicao.text = "🏭 POLUIÇÃO (por segundo)\n"
+	var label_poluicao_estat = Label.new()
+	label_poluicao_estat.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label_poluicao_estat.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label_poluicao_estat.text = "☢️ POLUIÇÃO (por segundo)\n"
 	
 	var total_poluicao = 0.0
 	for tipo in GameState.POLUICAO_POR_GERADOR.keys():
@@ -366,38 +380,45 @@ func atualizar_estatisticas():
 		var pol_unit = GameState.POLUICAO_POR_GERADOR[tipo]
 		var pol_total = pol_unit * qtd
 		
-		# Aplica filtro de carvão se ativo
 		if tipo == "carvao" and GameState.filtro_carvao_ativo:
 			pol_total *= 0.5
 		
 		total_poluicao += pol_total
 		
 		var icone = "🔴" if pol_unit > 0 else "🟢" if pol_unit < 0 else "⚪"
-		label_poluicao.text += "%s %s x%d: %.2f/s\n" % [icone, tipo.capitalize(), qtd, pol_total]
+		label_poluicao_estat.text += "%s %s x%d: %.2f/s\n" % [icone, tipo.capitalize(), qtd, pol_total]
 	
-	label_poluicao.text += "\n🌍 Poluição atual: %.0f%%\n" % GameState.poluicao
-	label_poluicao.text += " Variação: %.2f/s\n" % total_poluicao
+	label_poluicao_estat.text += "\nPoluição atual: %.0f%%\n" % GameState.poluicao
+	label_poluicao_estat.text += "Variação: %.2f/s\n" % total_poluicao
 	
 	if GameState.tecnicos_ambientais > 0:
 		var bonus_amb = 1.0 + min((GameState.tecnicos_ambientais - 1) * 0.08, 0.4)
 		var limpeza = GameState.tecnicos_ambientais * GameState.LIMPEZA_BASE_AMBIENTAL * bonus_amb
-		label_poluicao.text += "🌿 Limpeza: %.2f/s (%d técnicos)\n" % [limpeza, GameState.tecnicos_ambientais]
+		label_poluicao_estat.text += "🌿 Limpeza: %.2f/s (%d técnicos)\n" % [limpeza, GameState.tecnicos_ambientais]
 	
-	lista_estatisticas.add_child(label_poluicao)
+	lista_estatisticas.add_child(label_poluicao_estat)
 	
 	var separador3 = HSeparator.new()
+	separador3.custom_minimum_size.y = 10
 	lista_estatisticas.add_child(separador3)
 	
 	# --- ESTATÍSTICAS GERAIS ---
 	var label_geral = Label.new()
-	label_geral.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label_geral.text = " ESTATÍSTICAS GERAIS\n"
+	label_geral.autowrap_mode = TextServer.AUTOWRAP_WORD
+	label_geral.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label_geral.text = "📊 ESTATÍSTICAS GERAIS\n"
 	label_geral.text += "💰 Ouro atual: $%d\n" % int(GameState.ouro)
-	label_geral.text += "🏗️ Total de geradores: %d\n" % GameState.get_total_geradores()
+	label_geral.text += "🏗 Total de geradores: %d\n" % GameState.get_total_geradores()
 	label_geral.text += "🔧 Técnicos manutenção: %d\n" % GameState.tecnicos_manutencao
-	label_geral.text += " Técnicos ambientais: %d\n" % GameState.tecnicos_ambientais
-	var total_conquistas = achievement_manager.get("CONQUISTAS").size()
-	label_geral.text += "🏆 Conquistas desbloqueadas: %d/%d\n" % [_contar_conquistas_desbloqueadas(), total_conquistas]	
+	label_geral.text += "🌿 Técnicos ambientais: %d\n" % GameState.tecnicos_ambientais
+	
+	var total_conquistas = 0
+	if achievement_manager and achievement_manager.has_method("get"):
+		var conquistas = achievement_manager.get("CONQUISTAS")
+		if conquistas is Array:
+			total_conquistas = conquistas.size()
+	
+	label_geral.text += "🏆 Conquistas: %d/%d\n" % [_contar_conquistas_desbloqueadas(), total_conquistas]
 	
 	if GameState.filtro_carvao_ativo:
 		label_geral.text += "✅ Filtro de carvão: ATIVO\n"
@@ -1000,8 +1021,8 @@ func _on_botao_migrar_cidade_pressed() -> void:
 		_manut_inicializado = false
 		atualizar_interface()
 func _on_botao_abrir_estatisticas_pressed() -> void:
-	atualizar_estatisticas()
 	if painel_estatisticas: painel_estatisticas.visible = true
+	atualizar_estatisticas()
 	mudar_visibilidade_botoes(false)
 
 func _on_botao_fechar_estatisticas_pressed() -> void:
