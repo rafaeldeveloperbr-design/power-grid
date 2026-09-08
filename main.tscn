@@ -377,32 +377,35 @@ text = "FECHAR OPERACOES"
 
 [node name="PainelEstatisticas" type="PanelContainer" parent="." unique_id=718232801]
 visible = false
-offset_left = 8.0
-offset_top = 281.0
-offset_right = 776.0
-offset_bottom = 601.0
+offset_left = 10.0
+offset_top = 280.0
+offset_right = 780.0
+offset_bottom = 600.0
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PainelEstatisticas" unique_id=1269631367]
 layout_mode = 2
 
 [node name="LabelTituloEstatisticas" type="Label" parent="PainelEstatisticas/VBoxContainer" unique_id=1372131696]
 layout_mode = 2
-text = "ESTATÍSTICAS"
+theme_override_font_sizes/font_size = 14
+text = "--- ESTATÍSTICAS ---"
+horizontal_alignment = 1
 
 [node name="ScrollEstatisticas" type="ScrollContainer" parent="PainelEstatisticas/VBoxContainer" unique_id=438810943]
-custom_minimum_size = Vector2(200, 300)
+custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
 [node name="ListaEstatisticas" type="VBoxContainer" parent="PainelEstatisticas/VBoxContainer/ScrollEstatisticas" unique_id=138231046]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
 
 [node name="BotaoFecharEstatisticas" type="Button" parent="PainelEstatisticas/VBoxContainer" unique_id=2033172764]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Fechar"
+theme_override_font_sizes/font_size = 14
+text = "FECHAR ESTATÍSTICAS"
 
 [node name="AchievementManager" type="Node" parent="." unique_id=1841464132]
 script = ExtResource("2_0xm2m")
