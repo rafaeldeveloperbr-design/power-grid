@@ -23,6 +23,8 @@ var mult_hidro: float = 1.0
 var quantidade_compra: int = 1
 var hbox_quantidade_loja: HBoxContainer
 var hbox_quantidade_upgrades: HBoxContainer
+var quantidade_compra_manutencao: int = 1
+var hbox_quantidade_manutencao: HBoxContainer
 
 var eh_dia: bool = true
 var tempo_ciclo: int = 0
@@ -164,44 +166,59 @@ func _ready() -> void:
 
 
 func _criar_botoes_quantidade():
-	# Cria HBox para loja
+	var tipos_qtd = [1, 5, 10, 25, 50]
+	
+	# ─── LOJA ───
 	hbox_quantidade_loja = HBoxContainer.new()
 	hbox_quantidade_loja.name = "HBoxQuantidade"
 	
-	var tipos_qtd = [1, 5, 10, 25, 50]
 	for qtd in tipos_qtd:
 		var btn = Button.new()
 		btn.text = "x%d" % qtd
-		btn.pressed.connect(func(): _selecionar_quantidade(qtd))
+		btn.pressed.connect(func(): _selecionar_quantidade_loja(qtd))
 		if qtd == 1:
-			btn.modulate = Color(0.6, 1.0, 0.6)  # verde no selecionado
+			btn.modulate = Color(0.6, 1.0, 0.6)
 		hbox_quantidade_loja.add_child(btn)
 	
-	# Adiciona no topo do painel de loja
 	if painel_loja:
 		var vbox_loja = painel_loja.get_node("VBoxContainer")
 		vbox_loja.add_child(hbox_quantidade_loja)
 		vbox_loja.move_child(hbox_quantidade_loja, 0)
 	
-	# Cria HBox para upgrades (cópia)
+	# ─── UPGRADES ──
 	hbox_quantidade_upgrades = HBoxContainer.new()
 	hbox_quantidade_upgrades.name = "HBoxQuantidade"
 	
 	for qtd in tipos_qtd:
 		var btn = Button.new()
 		btn.text = "x%d" % qtd
-		btn.pressed.connect(func(): _selecionar_quantidade(qtd))
+		btn.pressed.connect(func(): _selecionar_quantidade_upgrades(qtd))
 		if qtd == 1:
 			btn.modulate = Color(0.6, 1.0, 0.6)
 		hbox_quantidade_upgrades.add_child(btn)
 	
-	# Adiciona no topo do painel de upgrades
 	if painel_upgrades:
 		var vbox_upgrades = painel_upgrades.get_node("VBoxContainer")
 		vbox_upgrades.add_child(hbox_quantidade_upgrades)
 		vbox_upgrades.move_child(hbox_quantidade_upgrades, 0)
-		
-		
+	
+	# ─── MANUTENÇÃO (NOVO!) ───
+	hbox_quantidade_manutencao = HBoxContainer.new()
+	hbox_quantidade_manutencao.name = "HBoxQuantidadeManutencao"
+	
+	for qtd in tipos_qtd:
+		var btn = Button.new()
+		btn.text = "x%d" % qtd
+		btn.pressed.connect(func(): _selecionar_quantidade_manutencao(qtd))
+		if qtd == 1:
+			btn.modulate = Color(0.6, 1.0, 0.6)
+		hbox_quantidade_manutencao.add_child(btn)
+	
+	if painel_manutencao:
+		var vbox_manut = painel_manutencao.get_node("VBoxContainer")
+		vbox_manut.add_child(hbox_quantidade_manutencao)
+		# Coloca depois do título de poluição (índice 1 ou 2, ajuste conforme sua cena)
+		vbox_manut.move_child(hbox_quantidade_manutencao, 1)
 
 
 func _on_cidade_mudou():
@@ -232,30 +249,39 @@ func atualizar_interface() -> void:
 	if painel_manutencao and painel_manutencao.visible:
 		atualizar_manutencao()
 		
-func _selecionar_quantidade(qtd: int):
+func _selecionar_quantidade_loja(qtd: int):
 	quantidade_compra = qtd
 	
-	# Atualiza visual dos botões na loja IMEDIATAMENTE
 	if hbox_quantidade_loja:
 		for btn in hbox_quantidade_loja.get_children():
 			var btn_qtd = int(btn.text.substr(1))
-			if btn_qtd == qtd:
-				btn.modulate = Color(0.6, 1.0, 0.6)  # verde
-			else:
-				btn.modulate = Color(1.0, 1.0, 1.0)  # branco
+			btn.modulate = Color(0.6, 1.0, 0.6) if btn_qtd == qtd else Color(1.0, 1.0, 1.0)
 	
-	# Atualiza visual dos botões nos upgrades IMEDIATAMENTE
+	atualizar_loja()
+
+
+func _selecionar_quantidade_upgrades(qtd: int):
+	quantidade_compra = qtd  # Upgrades compartilham a mesma variável da loja
+	
 	if hbox_quantidade_upgrades:
 		for btn in hbox_quantidade_upgrades.get_children():
 			var btn_qtd = int(btn.text.substr(1))
-			if btn_qtd == qtd:
-				btn.modulate = Color(0.6, 1.0, 0.6)  # verde
-			else:
-				btn.modulate = Color(1.0, 1.0, 1.0)  # branco
+			btn.modulate = Color(0.6, 1.0, 0.6) if btn_qtd == qtd else Color(1.0, 1.0, 1.0)
 	
-	# Atualiza os preços nos botões de compra IMEDIATAMENTE
-	atualizar_loja()
 	atualizar_upgrades()
+
+
+func _selecionar_quantidade_manutencao(qtd: int):
+	quantidade_compra_manutencao = qtd
+	
+	if hbox_quantidade_manutencao:
+		for btn in hbox_quantidade_manutencao.get_children():
+			var btn_qtd = int(btn.text.substr(1))
+			btn.modulate = Color(0.6, 1.0, 0.6) if btn_qtd == qtd else Color(1.0, 1.0, 1.0)
+	
+	# Atualiza os preços na manutenção
+	if painel_manutencao and painel_manutencao.visible:
+		atualizar_manutencao()
 
 func atualizar_labels_recurso():
 	var cap_max = GameState.calcular_capacidade_maxima()
@@ -920,7 +946,8 @@ func _atualizar_textos_manutencao():
 	_manut_btn_captura.text = "Captura Carbono ($%d) [%s]" % [int(GameState.get_preco("captura_carbono")), "ON" if GameState.captura_carbono_ativa else "OFF"]
 	_manut_btn_captura.disabled = not GameState.pode_comprar("captura_carbono")
 	
-	_manut_btn_tec_amb.text = "🌿 Técnico Ambiental ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_ambiental")), GameState.tecnicos_ambientais]
+	var preco_tec_amb = GameState.calcular_preco_total("tecnico_ambiental", quantidade_compra_manutencao)
+	_manut_btn_tec_amb.text = "🌿 Técnico Ambiental x%d ($%d) Qtd: %d" % [quantidade_compra_manutencao, int(preco_tec_amb), GameState.tecnicos_ambientais]
 	_manut_btn_tec_amb.disabled = not GameState.pode_comprar("tecnico_ambiental")
 	
 	# --- SAÚDE ---
@@ -945,7 +972,8 @@ func _atualizar_textos_manutencao():
 		total_geradores, GameState.tecnicos_manutencao, capacidade, eficiencia * 100.0, status, poder_total
 	]
 	
-	_manut_btn_tecnico.text = "🔧 Contratar Técnico ($%d) Qtd: %d" % [int(GameState.get_preco("tecnico_manutencao")), GameState.tecnicos_manutencao]
+	var preco_tec_manut = GameState.calcular_preco_total("tecnico_manutencao", quantidade_compra_manutencao)
+	_manut_btn_tecnico.text = "🔧 Contratar Técnico x%d ($%d) Qtd: %d" % [quantidade_compra_manutencao, int(preco_tec_manut), GameState.tecnicos_manutencao]
 	_manut_btn_tecnico.disabled = not GameState.pode_comprar("tecnico_manutencao")
 	
 	# Labels e botões de cada gerador
@@ -1177,7 +1205,12 @@ func _on_botao_abrir_habilidades_pressed() -> void:
 		push_warning("SkillTreePanel não encontrado!")
 
 func _comprar(tipo: String):
-	var comprado = GameState.comprar_quantidade(tipo, quantidade_compra)
+	# Usa quantidade de manutenção para itens de manutenção
+	var qtd_a_comprar = quantidade_compra
+	if tipo in ["tecnico_manutencao", "tecnico_ambiental"]:
+		qtd_a_comprar = quantidade_compra_manutencao
+	
+	var comprado = GameState.comprar_quantidade(tipo, qtd_a_comprar)
 	
 	if comprado:
 		if achievement_manager:
