@@ -205,7 +205,7 @@ func _criar_botoes_quantidade():
 
 
 func _on_cidade_mudou():
-	mensagem_conquista = "🏙️ Bem-vindo a %s! Eficiência +15%%" % GameState.get_cidade_atual_info().nome
+	mensagem_conquista = "🏙️ Bem-vindo a %s!" % GameState.get_cidade_atual_info().nome
 	tempo_mensagem_conquista = 5
 	if label_conquista:
 		label_conquista.text = "🏆 " + mensagem_conquista
