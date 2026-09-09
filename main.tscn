@@ -418,6 +418,7 @@ script = ExtResource("2_0xm2m")
 
 [node name="SkillTreePanel" parent="." unique_id=57992230 instance=ExtResource("3_h2yge")]
 unique_name_in_owner = true
+visible = false
 anchors_preset = 0
 anchor_right = 0.0
 anchor_bottom = 0.0

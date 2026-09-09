@@ -85,7 +85,7 @@ var rng = RandomNumberGenerator.new()
 @onready var lista_estatisticas: VBoxContainer = $PainelEstatisticas/VBoxContainer/ScrollEstatisticas/ListaEstatisticas
 
 @onready var skill_tree_panel: PanelContainer = $SkillTreePanel 
-@onready var botao_abrir_habilidades: Button = $BotaoAbrirHabilidades  
+@onready var botao_abrir_habilidades: Button = $BotoesPrincipais/BotaoAbrirHabilidades  
 
 # --- NOVO: variáveis pra guardar os nós da manutenção (criados UMA VEZ) ---
 var _manut_label_pol: Label
@@ -126,8 +126,8 @@ func _ready() -> void:
 	if botao_abrir_estatisticas: botao_abrir_estatisticas.visible = false
 	if painel_estatisticas: painel_estatisticas.visible = false
 	
-	if botao_abrir_habilidades:
-		botao_abrir_habilidades.pressed.connect(_on_botao_abrir_habilidades_pressed)
+	#if botao_abrir_habilidades:
+	#	botao_abrir_habilidades.pressed.connect(_on_botao_abrir_habilidades_pressed)
 	
 	
 	if GameState.has_signal("recurso_mudou"):
@@ -537,7 +537,7 @@ func _atualizar_textos_estatisticas():
 	# Atualiza técnicos
 	if GameState.tecnicos_manutencao > 0:
 		var cap_por_tec = GameState.CAPACIDADE_POR_TECNICO if "CAPACIDADE_POR_TECNICO" in GameState else 12
-		var base_reparo = GameState.REPARO_BASE_POR_TECNICO if "REPARO_BASE_POR_TECNICO" in GameState else 1.2
+		var base_reparo = float(GameState.REPARO_BASE_POR_TECNICO) if "REPARO_BASE_POR_TECNICO" in GameState else 1.2
 		var capacidade = GameState.tecnicos_manutencao * cap_por_tec
 		var bonus_manut = 1.0 + min((GameState.tecnicos_manutencao - 1) * 0.08, 0.4)
 		var poder_total = GameState.tecnicos_manutencao * base_reparo * bonus_manut
@@ -569,8 +569,8 @@ func _atualizar_textos_estatisticas():
 
 func _formatar_tempo(segundos: float) -> String:
 	var segs_int = int(segundos)
-	var horas = segs_int / 3600
-	var mins = (segs_int % 3600) / 60
+	var horas = float(segs_int) / 3600.0      # ✅ Agora é float
+	var mins = float(segs_int % 3600) / 60.0  # ✅ Agora é float
 	var secs = segs_int % 60
 	
 	if horas > 0:
@@ -953,7 +953,7 @@ func _atualizar_textos_manutencao():
 	# --- SAÚDE ---
 	var total_geradores = GameState.get_total_geradores()
 	var cap_por_tec = GameState.CAPACIDADE_POR_TECNICO if "CAPACIDADE_POR_TECNICO" in GameState else 12
-	var base_reparo = GameState.REPARO_BASE_POR_TECNICO if "REPARO_BASE_POR_TECNICO" in GameState else 1.2
+	var base_reparo =  float(GameState.REPARO_BASE_POR_TECNICO) if "REPARO_BASE_POR_TECNICO" in GameState else 1.2
 	var capacidade = GameState.tecnicos_manutencao * cap_por_tec
 	var eficiencia = 1.0
 	if total_geradores > 0 and capacidade > 0:

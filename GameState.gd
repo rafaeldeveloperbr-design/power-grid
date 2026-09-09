@@ -328,7 +328,7 @@ func _get_multiplicador_preco(chave: String) -> float:
 		"up_hidreletrica", "up_nuclear": return 2.5
 		"up_fusao": return 2.6
 		"tecnico_manutencao", "tecnico_ambiental": return 1.20
-		_: return 1.15
+		_: return base
 
 func pode_comprar_quantidade(chave: String, quantidade: int) -> bool:
 	# Verifica pré-requisitos
