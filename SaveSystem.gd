@@ -57,6 +57,9 @@ func salvar_jogo() -> bool:
 		"precos": GameState.precos.duplicate(),
 		"bonus_conquistas": GameState.bonus_conquistas.duplicate(),
 		
+		"skill_pontos": SkillTreeManager.pontos_disponiveis,
+		"skill_desbloqueadas": SkillTreeManager.desbloqueadas.duplicate(),
+		
 		# --- ACHIEVEMENT MANAGER ---
 		"conquistas_desbloqueadas": AchievementManager.desbloqueadas.duplicate(),
 	}
@@ -152,6 +155,10 @@ func carregar_jogo() -> bool:
 	# Dicionários
 	GameState.precos = dados_save.get("precos", GameState.PRECO_BASE.duplicate())
 	GameState.bonus_conquistas = dados_save.get("bonus_conquistas", {}).duplicate()
+	
+	SkillTreeManager.pontos_disponiveis = dados_save.get("skill_pontos", 0)
+	SkillTreeManager.desbloqueadas = dados_save.get("skill_desbloqueadas", {}).duplicate()
+	SkillTreeManager._calcular_bonus_cache()
 	
 	# --- RESTAURA ACHIEVEMENTS ---
 	AchievementManager.desbloqueadas = dados_save.get("conquistas_desbloqueadas", {}).duplicate()

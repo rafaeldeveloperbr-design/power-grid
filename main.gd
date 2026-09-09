@@ -82,6 +82,8 @@ var rng = RandomNumberGenerator.new()
 @onready var botao_abrir_estatisticas: Button = $BotoesPrincipais/BotaoAbrirEstatisticas
 @onready var lista_estatisticas: VBoxContainer = $PainelEstatisticas/VBoxContainer/ScrollEstatisticas/ListaEstatisticas
 
+@onready var skill_tree_panel: PanelContainer = $SkillTreePanel 
+
 # --- NOVO: variáveis pra guardar os nós da manutenção (criados UMA VEZ) ---
 var _manut_label_pol: Label
 var _manut_btn_filtro: Button
@@ -1136,18 +1138,26 @@ func _on_botao_fechar_manutencao_pressed() -> void:
 	if painel_manutencao: painel_manutencao.visible = false
 	mudar_visibilidade_botoes(true)
 func _on_botao_migrar_cidade_pressed() -> void:
-	
-	# Salva automaticamente após migrar
-	SaveSystem.salvar_jogo()
-	print("💾 Jogo salvo após migração de cidade!")
+	if GameState.pode_migrar_cidade():
+		SaveSystem.salvar_jogo()
 		
-	if GameState.migrar_cidade():
-		if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
-			achievement_manager.resetar_conquistas()
-		# --- NOVO: reseta a UI de manutenção pra recriar na próxima vez ---
-		_manut_inicializado = false
-		_estat_inicializado = false
-		atualizar_interface()
+		if GameState.migrar_cidade():
+			print(" skill_tree_panel:", skill_tree_panel)
+			print("🔍 has_method abrir:", skill_tree_panel.has_method("abrir") if skill_tree_panel else false)
+			
+			if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
+				achievement_manager.resetar_conquistas()
+			
+			_manut_inicializado = false
+			_estat_inicializado = false
+			
+			if skill_tree_panel:
+				print("🌟 Abrindo Skill Tree...")
+				skill_tree_panel.abrir()
+			else:
+				push_error("skill_tree_panel não encontrado!")
+			
+			atualizar_interface()
 
 func _on_botao_abrir_estatisticas_pressed() -> void:
 	if painel_estatisticas: painel_estatisticas.visible = true
@@ -1230,4 +1240,55 @@ func _unhandled_input(event):
 				for k in GameState.precos.keys():
 					GameState.precos[k] = 1.0
 				print("Cheat: tudo por $1")
+			KEY_F12: # 🔥 RESET TOTAL (deleta save e zera tudo)
+				_reset_total()
 		atualizar_interface()
+
+
+# NOVA FUNÇÃO: Reset total para modo teste
+func _reset_total():
+	print("🔥 RESET TOTAL INICIADO...")
+	
+	# 1. Deleta o save para não carregar de novo
+	SaveSystem.deletar_save()
+	
+	# 2. Reseta o GameState completamente
+	GameState.resetar_jogo_completo()
+	
+	# 3. Reseta a SkillTree (habilidades)
+	if SkillTreeManager.has_method("resetar_tudo"):
+		SkillTreeManager.resetar_tudo()
+	
+	# 4. Reseta conquistas
+	if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
+		achievement_manager.resetar_conquistas()
+	
+	# 5. Reseta variáveis locais do script principal
+	eh_dia = true
+	tempo_ciclo = 0
+	tempo_jogo = 0
+	tempo_total_jogado = 0.0
+	clima_atual = Clima.NORMAL
+	tempo_clima_restante = 0
+	tempo_proximo_evento = 30
+	mult_eolica = 1.0
+	mult_solar = 1.0
+	mult_hidro = 1.0
+	quantidade_compra = 1
+	
+	# 6. Esconde painéis abertos
+	if painel_loja: painel_loja.visible = false
+	if painel_upgrades: painel_upgrades.visible = false
+	if painel_conquistas: painel_conquistas.visible = false
+	if painel_manutencao: painel_manutencao.visible = false
+	if painel_estatisticas: painel_estatisticas.visible = false
+	if label_blackout: label_blackout.visible = false
+	
+	# 7. Recria UI de manutenção e estatísticas
+	_manut_inicializado = false
+	_estat_inicializado = false
+	
+	# 8. Atualiza interface
+	atualizar_interface()
+	
+	print("✅ RESET TOTAL CONCLUÍDO! Jogo como novo.")

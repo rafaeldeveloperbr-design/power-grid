@@ -185,9 +185,12 @@ func pode_migrar_cidade() -> bool:
 func migrar_cidade() -> bool:
 	if not pode_migrar_cidade():
 		return false
-	
 	cidade_atual += 1
-	eficiencia_global *= 1.15 # só isso que fica
+	
+	SkillTreeManager.adicionar_pontos(1)
+	
+	# Ouro inicial da habilidade "Investidor"
+	ouro = SkillTreeManager.get_bonus("ouro_inicial")
 	
 	# --- ZERA TUDO ---
 	ouro = 0.0
@@ -245,16 +248,17 @@ func aplicar_bonus_conquista(bonus_key: String):
 	recalcular_tudo()
 
 func recalcular_tudo():
-	var mult_solar = get_multiplicador("producao_solar")
-	var mult_eolica = get_multiplicador("producao_eolica")
+	# ✅ MODIFIQUE AS MULTIPLICADORAS PARA INCLUIR BÔNUS DA SKILL:
+	var mult_solar = get_multiplicador("producao_solar") * (1.0 + SkillTreeManager.get_bonus("producao_solar"))
+	var mult_eolica = get_multiplicador("producao_eolica") * (1.0 + SkillTreeManager.get_bonus("producao_eolica"))
 	var mult_geo = get_multiplicador("producao_geotermica")
 	var mult_nuc = get_multiplicador("producao_nuclear")
 	var mult_fusao = get_multiplicador("producao_fusao")
 	var mult_hidro = get_multiplicador("producao_hidreletrica")
 	var mult_carvao = get_multiplicador("producao_carvao")
 	var mult_bio = get_multiplicador("producao_biomassa")
-	var mult_bat = get_multiplicador("capacidade_bateria")
-	var mult_mani = get_multiplicador("poder_manivela")
+	var mult_bat = get_multiplicador("capacidade_bateria") * (1.0 + SkillTreeManager.get_bonus("capacidade_bateria"))
+	var mult_mani = get_multiplicador("poder_manivela") * (1.0 + SkillTreeManager.get_bonus("poder_manivela"))
 
 	producao_solar = (PRODUCAO_BASE.solar + (nivel_solar_upgrade - 1) * INCREMENTO_UPGRADE.solar) * mult_solar * eficiencia_global
 	producao_eolica = (PRODUCAO_BASE.eolica + (nivel_eolica_upgrade - 1) * INCREMENTO_UPGRADE.eolica) * mult_eolica * eficiencia_global
@@ -269,7 +273,15 @@ func recalcular_tudo():
 	producao_mudou.emit()
 
 func get_preco(chave: String) -> float:
-	return precos.get(chave, 999999.0)
+	var preco =  precos.get(chave, 999999.0)
+# ✅ ADICIONE ISSO:
+	match chave:
+			"solar": preco *= (1.0 + SkillTreeManager.get_bonus("preco_solar"))
+			"eolica": preco *= (1.0 + SkillTreeManager.get_bonus("preco_eolica"))
+			"nuclear": preco *= (1.0 + SkillTreeManager.get_bonus("preco_nuclear"))
+			"fusao": preco *= (1.0 + SkillTreeManager.get_bonus("preco_fusao"))
+		
+	return max(1.0, preco)
 
 func pode_comprar(chave: String) -> bool:
 	if ouro < get_preco(chave):
@@ -302,6 +314,11 @@ func calcular_preco_total(chave: String, quantidade: int) -> float:
 	return preco_total
 
 func _get_multiplicador_preco(chave: String) -> float:
+	var reduzido = SkillTreeManager.get_bonus("multiplicador_preco_reduz")
+	var base = 1.15
+	if reduzido:
+		base = 1.10
+		
 	match chave:
 		"carvao": return 1.12
 		"fusao": return 1.2
@@ -450,8 +467,36 @@ func calcular_oferta_bruta(eh_dia: bool, mult_eolica: float, mult_solar: float, 
 	
 	var penalidade_poluicao = 1.0 - (poluicao / 100.0 * 0.5)
 	
-	var prod_solar = (paineis_solares * producao_solar * mult_solar * penalidade_poluicao * h_solar) if eh_dia else 0.0
-	var prod_eolica = turbinas_eolicas * producao_eolica * mult_eolica * h_eolica
+# ✅ MODIFIQUE O SOLAR PARA HABILIDADES ESPECIAIS:
+	var solar_noturno_bonus = SkillTreeManager.get_bonus("solar_noturno")
+	var prod_solar = 0.0
+	if eh_dia:
+		prod_solar = paineis_solares * producao_solar * mult_solar * penalidade_poluicao * h_solar
+		# Ignora poluição se tiver a habilidade
+		if SkillTreeManager.get_bonus("solar_ignora_poluicao"):
+			prod_solar = paineis_solares * producao_solar * mult_solar * h_solar
+	else:
+		# Gera à noite se tiver a habilidade
+		if solar_noturno_bonus > 0:
+			prod_solar = paineis_solares * producao_solar * solar_noturno_bonus * h_solar
+	
+	# Eclipse resistente
+	if not eh_dia and mult_solar == 0.0:  # eclipse
+		var eclipse_resist = SkillTreeManager.get_bonus("solar_eclipse_resist")
+		if eclipse_resist > 0:
+			prod_solar = paineis_solares * producao_solar * eclipse_resist * h_solar
+	
+	# ✅ MODIFIQUE EÓLICA PARA HABILIDADES ESPECIAIS:
+	var tempestade_bonus = SkillTreeManager.get_bonus("eolica_tempestade_bonus")
+	var eolica_mult = mult_eolica
+	if tempestade_bonus > 0 and mult_eolica > 1.0:
+		eolica_mult += tempestade_bonus
+	
+	var eolica_minimo = SkillTreeManager.get_bonus("eolica_minimo")
+	var prod_eolica = turbinas_eolicas * producao_eolica * eolica_mult * h_eolica
+	if eolica_minimo > 0 and mult_eolica < 0.5:
+		prod_eolica = max(prod_eolica, turbinas_eolicas * producao_eolica * eolica_minimo * h_eolica)
+	
 	var prod_geo = usinas_geotermicas * producao_geotermica * h_geo
 	var prod_nuc = reatores_nucleares * producao_nuclear * h_nuc
 	var prod_fusao = reatores_fusao * producao_fusao * h_fusao
@@ -471,8 +516,14 @@ func atualizar_poluicao(delta: float):
 		if tipo == "carvao" and filtro_carvao_ativo: pol *= 0.5
 		producao += pol
 	
-	if captura_carbono_ativa: producao -= 2.5
-	producao -= 0.08 # respiro natural
+	if captura_carbono_ativa:
+		var captura_base = 2.5
+		captura_base *= (1.0 + SkillTreeManager.get_bonus("captura_bonus"))
+		producao -= captura_base
+	var respiro = 0.08
+	if SkillTreeManager.get_bonus("respiro_dobro"):
+		respiro = 0.16
+	producao -= respiro
 	
 	# Ambientais também com capacidade
 	if tecnicos_ambientais > 0:
@@ -485,7 +536,8 @@ func atualizar_poluicao(delta: float):
 		var limpeza = tecnicos_ambientais * LIMPEZA_BASE_AMBIENTAL * bonus * efic_amb
 		producao -= limpeza
 	
-	poluicao = clamp(poluicao + producao * delta, 0.0, 100.0)
+	var pol_max = SkillTreeManager.get_bonus("poluicao_max")
+	poluicao = clamp(poluicao + producao * delta, 0.0, pol_max)
 	poluicao_mudou.emit()
 
 func desgastar(delta: float, clima_atual: int):
@@ -500,7 +552,7 @@ func desgastar(delta: float, clima_atual: int):
 			tipos_ativos.append(tipo)
 
 	# Eficiência por sobrecarga
-	var capacidade_total = tecnicos_manutencao * CAPACIDADE_POR_TECNICO
+	var capacidade_total = tecnicos_manutencao * (CAPACIDADE_POR_TECNICO + SkillTreeManager.get_bonus("capacidade_tecnico_extra"))
 	var eficiencia_sobrecarga = 1.0
 	if total_geradores > 0 and capacidade_total > 0:
 		eficiencia_sobrecarga = min(1.0, float(capacidade_total) / float(total_geradores))
@@ -519,11 +571,18 @@ func desgastar(delta: float, clima_atual: int):
 		var fator_qtd = 1.0 + (qtd / 15.0) * 0.25 # quanto mais usina daquele tipo, mais desgasta
 		
 		var taxa = DESGASTE_BASE * fator_clima * fator_tipo * fator_qtd * delta
+		
+		match tipo:
+			"solar": taxa *= (1.0 + SkillTreeManager.get_bonus("solar_desgaste"))
+			"eolica": taxa *= (1.0 + SkillTreeManager.get_bonus("eolica_desgaste"))
+			
+		taxa *= (1.0 + SkillTreeManager.get_bonus("desgaste_global"))	
 		saude[tipo] = max(0.0, saude[tipo] - taxa)
 
 	# REPARO PRIORITÁRIO - foca no mais danificado primeiro
 	if tecnicos_manutencao > 0 and tipos_ativos.size() > 0:
 		var bonus = 1.0 + min((tecnicos_manutencao - 1) * 0.08, 0.4)
+		bonus *= (1.0 + SkillTreeManager.get_bonus("reparo_bonus"))  # ← ADICIONE
 		var poder_total = tecnicos_manutencao * REPARO_BASE_POR_TECNICO * bonus * eficiencia_sobrecarga * delta
 		
 		# Lista de geradores danificados, ordenados do mais danificado pro menos

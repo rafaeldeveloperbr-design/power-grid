@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bqk3p28bk5bhw" path="res://main.gd" id="1_ig7tw"]
 [ext_resource type="Script" uid="uid://b0ifbw5vukibm" path="res://AchievementManager.gd" id="2_0xm2m"]
+[ext_resource type="PackedScene" uid="uid://d15kj4ksnhysc" path="res://SkillTreeUI.tscn" id="3_h2yge"]
 
 [node name="Main" type="Node2D" unique_id=49327064]
 script = ExtResource("1_ig7tw")
@@ -409,6 +410,13 @@ text = "FECHAR ESTATÍSTICAS"
 
 [node name="AchievementManager" type="Node" parent="." unique_id=1841464132]
 script = ExtResource("2_0xm2m")
+
+[node name="SkillTreePanel" parent="." unique_id=57992230 instance=ExtResource("3_h2yge")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [connection signal="pressed" from="BotaoManivela" to="." method="_on_botao_manivela_pressed"]
 [connection signal="pressed" from="BotaoMigrarCidade" to="." method="_on_botao_migrar_cidade_pressed"]
