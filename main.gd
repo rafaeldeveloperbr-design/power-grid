@@ -121,6 +121,14 @@ func _ready() -> void:
 	if botao_abrir_estatisticas: botao_abrir_estatisticas.visible = false
 	if painel_estatisticas: painel_estatisticas.visible = false
 	
+		# --- AUTOSAVE ---
+	# Tenta carregar automaticamente ao iniciar
+	if SaveSystem.existe_save():
+		SaveSystem.carregar_jogo()
+		print("📂 Save carregado automaticamente!")
+	else:
+		print(" Novo jogo iniciado!")
+	
 	
 	if GameState.has_signal("recurso_mudou"):
 		GameState.recurso_mudou.connect(atualizar_interface)
@@ -136,9 +144,6 @@ func _ready() -> void:
 	
 	# --- BOTÕES DE QUANTIDADE ---
 	_criar_botoes_quantidade()
-	
-	print("DEBUG: PainelEstatisticas = ", $PainelEstatisticas)
-	print("DEBUG: ListaEstatisticas = ", $PainelEstatisticas/VBoxContainer/ScrollEstatisticas/ListaEstatisticas)
 
 
 	# --- MODO TESTE ---
@@ -367,7 +372,7 @@ func _criar_nos_estatisticas():
 	_estat_label_saude_titulo.autowrap_mode = TextServer.AUTOWRAP_WORD
 	_estat_label_saude_titulo.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_estat_label_saude_titulo.size_flags_vertical = Control.SIZE_FILL
-	_estat_label_saude_titulo.text = "❤️ SAÚDE DOS GERADORES\n"
+	_estat_label_saude_titulo.text = "❤️ SAÚDE DOS GERADORES"
 	lista_estatisticas.add_child(_estat_label_saude_titulo)
 	
 	# Cria labels para cada tipo de gerador
@@ -1011,6 +1016,9 @@ func _on_timer_timeout() -> void:
 	tempo_total_jogado += delta  
 	tempo_ciclo += 1
 	tempo_jogo += 1
+	# Salva automaticamente a cada 30 segundos
+	if tempo_jogo % 30 == 0:
+		SaveSystem.salvar_jogo()
 	
 	if tempo_mensagem_conquista > 0:
 		tempo_mensagem_conquista -= 1
@@ -1081,6 +1089,13 @@ func _on_timer_timeout() -> void:
 				label_blackout.text = "⚠ BLACKOUT! DEMANDA CONGELADA!"
 	if painel_estatisticas and painel_estatisticas.visible:
 		_atualizar_textos_estatisticas()
+		
+# Adicione esta função para salvar ao fechar o jogo:
+func _notification(what):
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		# Salva antes de fechar
+		SaveSystem.salvar_jogo()
+		get_tree().quit()
 
 func mudar_visibilidade_botoes(visivel: bool) -> void:
 	if botao_manivela: botao_manivela.visible = visivel
@@ -1119,6 +1134,11 @@ func _on_botao_fechar_manutencao_pressed() -> void:
 	if painel_manutencao: painel_manutencao.visible = false
 	mudar_visibilidade_botoes(true)
 func _on_botao_migrar_cidade_pressed() -> void:
+	
+	# Salva automaticamente após migrar
+	SaveSystem.salvar_jogo()
+	print("💾 Jogo salvo após migração de cidade!")
+		
 	if GameState.migrar_cidade():
 		if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
 			achievement_manager.resetar_conquistas()
@@ -1126,6 +1146,15 @@ func _on_botao_migrar_cidade_pressed() -> void:
 		_manut_inicializado = false
 		_estat_inicializado = false
 		atualizar_interface()
+	if GameState.migrar_cidade():
+		if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
+			achievement_manager.resetar_conquistas()
+		
+		_manut_inicializado = false
+		_estat_inicializado = false
+		atualizar_interface()
+		
+
 func _on_botao_abrir_estatisticas_pressed() -> void:
 	if painel_estatisticas: painel_estatisticas.visible = true
 	atualizar_estatisticas()

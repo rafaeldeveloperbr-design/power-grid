@@ -18,6 +18,8 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameState="*uid://bsn4pryh8e1g7"
+SaveSystem="*uid://dplde0udwlokd"
+AchievementManager="*uid://b0ifbw5vukibm"
 
 [display]
 
