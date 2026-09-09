@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://co6ig4bqf30hr" path="res://SkillTreeUI.gd" id="1_crh5p"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_crh5p"]
+
 [node name="SkillTreePanel" type="PanelContainer" unique_id=57992230]
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,17 +12,22 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_crh5p")
 script = ExtResource("1_crh5p")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=1557190305]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="LabelTitulo" type="Label" parent="VBoxContainer" unique_id=910957180]
 layout_mode = 2
 text = "🌟 Árvore de Habilidades"
+horizontal_alignment = 1
 
 [node name="HBoxCategorias" type="HBoxContainer" parent="VBoxContainer" unique_id=845808607]
 layout_mode = 2
+alignment = 1
 
 [node name="BotaoTodas" type="Button" parent="VBoxContainer/HBoxCategorias" unique_id=18420767]
 layout_mode = 2
@@ -48,15 +55,20 @@ text = "⚙️ Geral"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VBoxContainer" unique_id=430394195]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VBoxContainer/ScrollContainer" unique_id=1849556609]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer" unique_id=265309070]
 layout_mode = 2
 
 [node name="LabelPontos" type="Label" parent="VBoxContainer/HBoxContainer2" unique_id=1271136172]
 layout_mode = 2
+size_flags_horizontal = 3
 text = "🌟 Pontos: 0"
 
 [node name="BotaoFechar" type="Button" parent="VBoxContainer/HBoxContainer2" unique_id=1957713870]
