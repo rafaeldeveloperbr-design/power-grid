@@ -121,13 +121,7 @@ func _ready() -> void:
 	if botao_abrir_estatisticas: botao_abrir_estatisticas.visible = false
 	if painel_estatisticas: painel_estatisticas.visible = false
 	
-		# --- AUTOSAVE ---
-	# Tenta carregar automaticamente ao iniciar
-	if SaveSystem.existe_save():
-		SaveSystem.carregar_jogo()
-		print("📂 Save carregado automaticamente!")
-	else:
-		print(" Novo jogo iniciado!")
+
 	
 	
 	if GameState.has_signal("recurso_mudou"):
@@ -155,6 +149,14 @@ func _ready() -> void:
 		if label_blackout:
 			label_blackout.text = "[TESTE %dx] %s" % [VELOCIDADE_TESTE, label_blackout.text]
 			label_blackout.visible = true
+			
+			# --- AUTOSAVE ---
+	# Tenta carregar automaticamente ao iniciar
+	if SaveSystem.existe_save():
+		SaveSystem.carregar_jogo()
+		print("📂 Save carregado automaticamente!")
+	else:
+		print(" Novo jogo iniciado!")
 
 
 func _criar_botoes_quantidade():
@@ -1146,14 +1148,6 @@ func _on_botao_migrar_cidade_pressed() -> void:
 		_manut_inicializado = false
 		_estat_inicializado = false
 		atualizar_interface()
-	if GameState.migrar_cidade():
-		if achievement_manager and achievement_manager.has_method("resetar_conquistas"):
-			achievement_manager.resetar_conquistas()
-		
-		_manut_inicializado = false
-		_estat_inicializado = false
-		atualizar_interface()
-		
 
 func _on_botao_abrir_estatisticas_pressed() -> void:
 	if painel_estatisticas: painel_estatisticas.visible = true
