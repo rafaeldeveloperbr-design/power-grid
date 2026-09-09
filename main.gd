@@ -83,6 +83,7 @@ var rng = RandomNumberGenerator.new()
 @onready var lista_estatisticas: VBoxContainer = $PainelEstatisticas/VBoxContainer/ScrollEstatisticas/ListaEstatisticas
 
 @onready var skill_tree_panel: PanelContainer = $SkillTreePanel 
+@onready var botao_abrir_habilidades: Button = $BotaoAbrirHabilidades  
 
 # --- NOVO: variáveis pra guardar os nós da manutenção (criados UMA VEZ) ---
 var _manut_label_pol: Label
@@ -123,7 +124,8 @@ func _ready() -> void:
 	if botao_abrir_estatisticas: botao_abrir_estatisticas.visible = false
 	if painel_estatisticas: painel_estatisticas.visible = false
 	
-
+	if botao_abrir_habilidades:
+		botao_abrir_habilidades.pressed.connect(_on_botao_abrir_habilidades_pressed)
 	
 	
 	if GameState.has_signal("recurso_mudou"):
@@ -1167,6 +1169,12 @@ func _on_botao_abrir_estatisticas_pressed() -> void:
 func _on_botao_fechar_estatisticas_pressed() -> void:
 	if painel_estatisticas: painel_estatisticas.visible = false
 	mudar_visibilidade_botoes(true)
+	
+func _on_botao_abrir_habilidades_pressed() -> void:
+	if skill_tree_panel and skill_tree_panel.has_method("abrir"):
+		skill_tree_panel.abrir()
+	else:
+		push_warning("SkillTreePanel não encontrado!")
 
 func _comprar(tipo: String):
 	var comprado = GameState.comprar_quantidade(tipo, quantidade_compra)

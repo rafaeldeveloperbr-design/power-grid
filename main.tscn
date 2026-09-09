@@ -120,6 +120,11 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "📊 Estatísticas"
 
+[node name="BotaoAbrirHabilidades" type="Button" parent="BotoesPrincipais" unique_id=1313721024]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🌟 Habilidades"
+
 [node name="PainelLoja" type="PanelContainer" parent="." unique_id=1241028789]
 visible = false
 offset_left = 10.0
@@ -419,7 +424,7 @@ anchor_bottom = 0.0
 offset_left = 12.0
 offset_top = 14.0
 offset_right = 780.0
-offset_bottom = 118.0
+offset_bottom = 439.0
 grow_horizontal = 1
 grow_vertical = 1
 
@@ -431,6 +436,7 @@ grow_vertical = 1
 [connection signal="pressed" from="BotoesPrincipais/BotaoAbrirConquistas" to="." method="_on_botao_abrir_conquistas_pressed"]
 [connection signal="pressed" from="BotoesPrincipais/BotaoAbrirManutencao" to="." method="_on_botao_abrir_manutencao_pressed"]
 [connection signal="pressed" from="BotoesPrincipais/BotaoAbrirEstatisticas" to="." method="_on_botao_abrir_estatisticas_pressed"]
+[connection signal="pressed" from="BotoesPrincipais/BotaoAbrirHabilidades" to="." method="_on_botao_abrir_habilidades_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarSolar" to="." method="_on_botao_comprar_solar_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarEolica" to="." method="_on_botao_comprar_eolica_pressed"]
 [connection signal="pressed" from="PainelLoja/VBoxContainer/ScrollLoja/ListaLoja/BotaoComprarBateria" to="." method="_on_botao_comprar_bateria_pressed"]
